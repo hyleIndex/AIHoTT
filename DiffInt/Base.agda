@@ -1,5 +1,5 @@
 {-# OPTIONS --cubical #-}
-module Diffint.Base where
+module DiffInt.Base where
 
 open import Cubical.Core.Everything
 
