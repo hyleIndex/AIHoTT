@@ -82,7 +82,7 @@ eq/ a b r i +ℤ eq/ a₁ b₁ r₁ i₁ = eq/ (a +ℕ' a₁) (b +ℕ' b₁) (+-
                                    fst b +ℕ (fst b₁ +ℕ snd a) +ℕ snd a₁ ≡⟨ cong (λ x → x +ℕ snd a₁) (ℕ.+-assoc (fst b) (fst b₁) (snd a)) ⟩
                                    fst b +ℕ fst b₁ +ℕ snd a +ℕ snd a₁   ≡⟨ sym (ℕ.+-assoc (fst b +ℕ fst b₁) (snd a) (snd a₁)) ⟩
                                    fst b +ℕ fst b₁ +ℕ (snd a +ℕ snd a₁) ∎
-eq/ a b r i +ℤ squash/ c c₁ p q i₁ i₂ = squash/ ([ a ] +ℤ c) ([ b ] +ℤ c₁) (+-rewrite-4 [ a ] [ b ] c c₁ (eq/ a b r) p) (+-rewrite-4 [ a ] [ b ] c c₁ (eq/ a b r) q) {!!} {!!}
+eq/ a b r i +ℤ squash/ c c₁ p q i₁ i₂ = squash/ ([ a ] +ℤ c) ([ b ] +ℤ c₁) (+-rewrite-4 [ a ] [ b ] c c₁ (eq/ a b r) p) (+-rewrite-4 [ a ] [ b ] c c₁ (eq/ a b r) q) (i ∧ i₁) {!!}
     where
       +-rewrite-4 : ∀ a b c d → a ≡ b → c ≡ d → a +ℤ c ≡ b +ℤ d
       +-rewrite-4 a b c d p q =
