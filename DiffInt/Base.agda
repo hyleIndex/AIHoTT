@@ -21,7 +21,7 @@ open import Cubical.HITs.SetQuotients
 open import Cubical.Foundations.Isomorphism
 
 open import Cubical.Data.Sigma
-open import Cubical.Data.Nat renaming (_+_ to _+ℕ_ ; _·_ to _*ℕ_)
+open import Cubical.Data.Nat as ℕ renaming (_+_ to _+ℕ_ ; _·_ to _*ℕ_)
 open import Cubical.Data.Int renaming (ℤ to Int)
 
 
@@ -37,15 +37,24 @@ _+ℕ'_ : (ℕ × ℕ) → (ℕ × ℕ) → (ℕ × ℕ)
 (n₁ , n₂) +ℕ' (m₁ , m₂) = (n₁ +ℕ m₁ , n₂ +ℕ m₂)
 
 +-assoc-6-1 : ∀ a b c d e f → c +ℕ f ≡ e +ℕ d → (a +ℕ c) +ℕ (b +ℕ f) ≡ (a +ℕ e) +ℕ (b +ℕ d)
-+-assoc-6-1 a b c d e f p = {!!}
---  (a +ℕ c) +ℕ (b +ℕ f) ≡⟨ +-comm b f ⟩
---  (a +ℕ c) +ℕ (f +ℕ b) ≡⟨ +-assoc c f b ⟩
---  a +ℕ c +ℕ f +ℕ b     ≡⟨ +-assoc a c f⟩
---  a +ℕ (c +ℕ f) +ℕ b   ≡⟨ p ⟩
---  a +ℕ (e +ℕ d) +ℕ b   ≡⟨ +-assoc a e d ⟩
---  a +ℕ e +ℕ d +ℕ b     ≡⟨ +-assoc e d f ⟩
---  a +ℕ e +ℕ (d +ℕ b)   ≡⟨ +-comm d f ⟩
---  a +ℕ e +ℕ (b +ℕ d) ∎
++-assoc-6-1 a b c d e f p =
+  (a +ℕ c) +ℕ (b +ℕ f) ≡⟨ cong (λ x → (a +ℕ c) +ℕ x) (ℕ.+-comm b f) ⟩
+  (a +ℕ c) +ℕ (f +ℕ b) ≡⟨ ℕ.+-assoc (a +ℕ c) f b ⟩
+  a +ℕ c +ℕ f +ℕ b     ≡⟨ cong (λ x → x +ℕ b) (sym (ℕ.+-assoc a c f)) ⟩
+  a +ℕ (c +ℕ f) +ℕ b   ≡⟨ cong (λ x → a +ℕ x +ℕ b) p ⟩
+  a +ℕ (e +ℕ d) +ℕ b   ≡⟨ cong (λ x → x +ℕ b) (ℕ.+-assoc a e d) ⟩
+  a +ℕ e +ℕ d +ℕ b     ≡⟨ sym (ℕ.+-assoc (a +ℕ e) d b) ⟩
+  a +ℕ e +ℕ (d +ℕ b)   ≡⟨ cong (λ x → a +ℕ e +ℕ x) (ℕ.+-comm d b) ⟩
+  a +ℕ e +ℕ (b +ℕ d) ∎
+
+  -- (a +ℕ c) +ℕ (b +ℕ f) ≡⟨ ℕ.+-comm b f ⟩
+  -- (a +ℕ c) +ℕ (f +ℕ b) ≡⟨ ℕ.+-assoc c f b ⟩
+  -- a +ℕ c +ℕ f +ℕ b     ≡⟨ +-assoc a c f⟩
+  -- a +ℕ (c +ℕ f) +ℕ b   ≡⟨ p ⟩
+  -- a +ℕ (e +ℕ d) +ℕ b   ≡⟨ +-assoc a e d ⟩
+  -- a +ℕ e +ℕ d +ℕ b     ≡⟨ +-assoc e d f ⟩
+  -- a +ℕ e +ℕ (d +ℕ b)   ≡⟨ +-comm d f ⟩
+  -- a +ℕ e +ℕ (b +ℕ d) ∎
 
 +-assoc-6-2 : ∀ a b c d e f → a +ℕ d ≡ c +ℕ b → (a +ℕ e) +ℕ (d +ℕ f) ≡ (c +ℕ e) +ℕ (b +ℕ f)
 +-assoc-6-2 a b c d e f p = {!!}
