@@ -10,13 +10,6 @@ open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Univalence
 
-open import Cubical.Data.Empty
-open import Cubical.Data.Bool
-open import Cubical.Data.Sum
-
-open import Cubical.Relation.Nullary
-open import Cubical.Relation.Nullary.DecidableEq
-
 open import Cubical.HITs.SetQuotients
 open import Cubical.Foundations.Isomorphism
 
