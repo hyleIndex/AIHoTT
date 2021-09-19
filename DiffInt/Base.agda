@@ -90,7 +90,7 @@ eq/ a b r i +ℤ squash/ c c₁ p q i₁ i₂ = squash/ ([ a ] +ℤ c) ([ b ] +�
         a +ℤ d ≡⟨ cong (λ x → x +ℤ d) (p) ⟩
         b +ℤ d ∎
 squash/ a a₁ p q i i₁ +ℤ [ a₂ ] = squash/ (a +ℤ [ a₂ ]) (a₁ +ℤ [ a₂ ]) (cong (λ x → x +ℤ [ a₂ ]) (p)) (cong (λ x → x +ℤ [ a₂ ]) (q)) i i₁
-squash/ a a₁ p q i i₁ +ℤ eq/ a₂ b r i₂ = squash/ (a +ℤ [ a₂ ]) (a₁ +ℤ [ b ]) (+-rewrite-4 a a₁ [ a₂ ] [ b ] p (eq/ a₂ b r)) (+-rewrite-4 a a₁ [ a₂ ] [ b ] q (eq/ a₂ b r)) {!!} {!!}
+squash/ a a₁ p q i i₁ +ℤ eq/ a₂ b r i₂ = squash/ (a +ℤ [ a₂ ]) (a₁ +ℤ [ b ]) (+-rewrite-4 a a₁ [ a₂ ] [ b ] p (eq/ a₂ b r)) (+-rewrite-4 a a₁ [ a₂ ] [ b ] q (eq/ a₂ b r)) (i ∧ i₂) {!!}
     where
       +-rewrite-4 : ∀ a b c d → a ≡ b → c ≡ d → a +ℤ c ≡ b +ℤ d
       +-rewrite-4 a b c d p q =
