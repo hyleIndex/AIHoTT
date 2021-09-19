@@ -36,46 +36,71 @@ rel (a₀ , b₀) (a₁ , b₁) = x ≡ y
 _+ℕ'_ : (ℕ × ℕ) → (ℕ × ℕ) → (ℕ × ℕ)
 (n₁ , n₂) +ℕ' (m₁ , m₂) = (n₁ +ℕ m₁ , n₂ +ℕ m₂)
 
-+-assoc-6-1 : ∀ a b c d e f → c +ℕ f ≡ e +ℕ d → (a +ℕ c) +ℕ (b +ℕ f) ≡ (a +ℕ e) +ℕ (b +ℕ d)
-+-assoc-6-1 a b c d e f p =
-  (a +ℕ c) +ℕ (b +ℕ f) ≡⟨ cong (λ x → (a +ℕ c) +ℕ x) (ℕ.+-comm b f) ⟩
-  (a +ℕ c) +ℕ (f +ℕ b) ≡⟨ ℕ.+-assoc (a +ℕ c) f b ⟩
-  a +ℕ c +ℕ f +ℕ b     ≡⟨ cong (λ x → x +ℕ b) (sym (ℕ.+-assoc a c f)) ⟩
-  a +ℕ (c +ℕ f) +ℕ b   ≡⟨ cong (λ x → a +ℕ x +ℕ b) p ⟩
-  a +ℕ (e +ℕ d) +ℕ b   ≡⟨ cong (λ x → x +ℕ b) (ℕ.+-assoc a e d) ⟩
-  a +ℕ e +ℕ d +ℕ b     ≡⟨ sym (ℕ.+-assoc (a +ℕ e) d b) ⟩
-  a +ℕ e +ℕ (d +ℕ b)   ≡⟨ cong (λ x → a +ℕ e +ℕ x) (ℕ.+-comm d b) ⟩
-  a +ℕ e +ℕ (b +ℕ d) ∎
-
-  -- (a +ℕ c) +ℕ (b +ℕ f) ≡⟨ ℕ.+-comm b f ⟩
-  -- (a +ℕ c) +ℕ (f +ℕ b) ≡⟨ ℕ.+-assoc c f b ⟩
-  -- a +ℕ c +ℕ f +ℕ b     ≡⟨ +-assoc a c f⟩
-  -- a +ℕ (c +ℕ f) +ℕ b   ≡⟨ p ⟩
-  -- a +ℕ (e +ℕ d) +ℕ b   ≡⟨ +-assoc a e d ⟩
-  -- a +ℕ e +ℕ d +ℕ b     ≡⟨ +-assoc e d f ⟩
-  -- a +ℕ e +ℕ (d +ℕ b)   ≡⟨ +-comm d f ⟩
-  -- a +ℕ e +ℕ (b +ℕ d) ∎
-
-+-assoc-6-2 : ∀ a b c d e f → a +ℕ d ≡ c +ℕ b → (a +ℕ e) +ℕ (d +ℕ f) ≡ (c +ℕ e) +ℕ (b +ℕ f)
-+-assoc-6-2 a b c d e f p = {!!}
---  (a +ℕ e) +ℕ (d +ℕ f) ≡⟨ +-comm a e ⟩
---  (e +ℕ a) +ℕ (d +ℕ f) ≡⟨ +-assoc a d f ⟩
---  e +ℕ a +ℕ d +ℕ f     ≡⟨ +-assoc e a d⟩
---  e +ℕ (a +ℕ d) +ℕ f   ≡⟨ p ⟩
---  e +ℕ (c +ℕ b) +ℕ f   ≡⟨ +-assoc e c b ⟩
---  e +ℕ c +ℕ b +ℕ f     ≡⟨ +-assoc c b f ⟩
---  e +ℕ c +ℕ (b +ℕ f)   ≡⟨ +-comm e c ⟩
---  c +ℕ e +ℕ (b +ℕ f) ∎  
- 
 _+ℤ_ : ℤ → ℤ → ℤ
 [ a ] +ℤ [ a₁ ] = [ a +ℕ' a₁ ]
 [ a ] +ℤ eq/ a₁ b r i = eq/ (a +ℕ' a₁) (a +ℕ' b)
                             (+-assoc-6-1 (fst a) (snd a) (fst a₁) (snd a₁) (fst b) (snd b) r) i
-[ a ] +ℤ squash/ c c₁ p q i i₁ = squash/ ( [ a ] +ℤ c) ([ a ] +ℤ c₁) {!!} {!!} i i₁
+                            where
+                              +-assoc-6-1 : ∀ a b c d e f → c +ℕ f ≡ e +ℕ d → (a +ℕ c) +ℕ (b +ℕ f) ≡ (a +ℕ e) +ℕ (b +ℕ d)
+                              +-assoc-6-1 a b c d e f p =
+                                (a +ℕ c) +ℕ (b +ℕ f) ≡⟨ cong (λ x → (a +ℕ c) +ℕ x) (ℕ.+-comm b f) ⟩
+                                (a +ℕ c) +ℕ (f +ℕ b) ≡⟨ ℕ.+-assoc (a +ℕ c) f b ⟩
+                                a +ℕ c +ℕ f +ℕ b     ≡⟨ cong (λ x → x +ℕ b) (sym (ℕ.+-assoc a c f)) ⟩
+                                a +ℕ (c +ℕ f) +ℕ b   ≡⟨ cong (λ x → a +ℕ x +ℕ b) p ⟩
+                                a +ℕ (e +ℕ d) +ℕ b   ≡⟨ cong (λ x → x +ℕ b) (ℕ.+-assoc a e d) ⟩
+                                a +ℕ e +ℕ d +ℕ b     ≡⟨ sym (ℕ.+-assoc (a +ℕ e) d b) ⟩
+                                a +ℕ e +ℕ (d +ℕ b)   ≡⟨ cong (λ x → a +ℕ e +ℕ x) (ℕ.+-comm d b) ⟩
+                                a +ℕ e +ℕ (b +ℕ d) ∎
+[ a ] +ℤ squash/ c c₁ p q i i₁ = squash/ ( [ a ] +ℤ c) ([ a ] +ℤ c₁) (cong (λ x → [ a ] +ℤ x) (p)) (cong (λ x → [ a ] +ℤ x) (q)) i i₁
 eq/ a b r i +ℤ [ a₁ ] = eq/ (a +ℕ' a₁) (b +ℕ' a₁)
                             (+-assoc-6-2 (fst a) (snd a) (fst b) (snd b) (fst a₁) (snd a₁) r) i
-eq/ a b r i +ℤ eq/ a₁ b₁ r₁ i₁ = eq/ (a +ℕ' a₁) (b +ℕ' b₁) {!!} {!!}
-eq/ a b r i +ℤ squash/ c c₁ p q i₁ i₂ = squash/ ([ a ] +ℤ c) ([ b ] +ℤ c₁) {!!} {!!} {!!} {!!}
-squash/ a a₁ p q i i₁ +ℤ [ a₂ ] = squash/ (a +ℤ [ a₂ ]) (a₁ +ℤ [ a₂ ]) {!!} {!!} i i₁
-squash/ a a₁ p q i i₁ +ℤ eq/ a₂ b r i₂ = squash/ (a +ℤ [ a₂ ]) (a₁ +ℤ [ b ]) {!!} {!!} {!!} {!!}
-squash/ a a₁ p q i i₁ +ℤ squash/ c c₁ p₁ q₁ i₂ i₃ = squash/ (a +ℤ c) (a₁ +ℤ c₁) {!!} {!!} {!!} {!!}
+                            where
+                              +-assoc-6-2 : ∀ a b c d e f → a +ℕ d ≡ c +ℕ b → (a +ℕ e) +ℕ (d +ℕ f) ≡ (c +ℕ e) +ℕ (b +ℕ f)
+                              +-assoc-6-2 a b c d e f p =
+                                (a +ℕ e) +ℕ (d +ℕ f) ≡⟨ cong (λ x → x +ℕ (d +ℕ f)) (ℕ.+-comm a e) ⟩
+                                (e +ℕ a) +ℕ (d +ℕ f) ≡⟨ ℕ.+-assoc (e +ℕ a) d f ⟩
+                                e +ℕ a +ℕ d +ℕ f     ≡⟨ cong (λ x → x +ℕ f) (sym (ℕ.+-assoc e a d)) ⟩
+                                e +ℕ (a +ℕ d) +ℕ f   ≡⟨ cong (λ x → e +ℕ x +ℕ f) p ⟩
+                                e +ℕ (c +ℕ b) +ℕ f   ≡⟨ cong (λ x → x +ℕ f) (ℕ.+-assoc e c b) ⟩
+                                e +ℕ c +ℕ b +ℕ f     ≡⟨ sym (ℕ.+-assoc (e +ℕ c) b f) ⟩
+                                e +ℕ c +ℕ (b +ℕ f)   ≡⟨ cong (λ x → x +ℕ (b +ℕ f)) (ℕ.+-comm e c) ⟩
+                                c +ℕ e +ℕ (b +ℕ f) ∎
+eq/ a b r i +ℤ eq/ a₁ b₁ r₁ i₁ = eq/ (a +ℕ' a₁) (b +ℕ' b₁) (+-assoc-8 a b a₁ b₁ r r₁) {!!}
+                               where
+                                 +-assoc-8 : ∀ a b a₁ b₁ → rel a b → rel a₁ b₁ → rel (a +ℕ' a₁) (b +ℕ' b₁)
+                                 +-assoc-8 a b a₁ b₁ r r₁ =
+                                   fst a +ℕ fst a₁ +ℕ (snd b +ℕ snd b₁) ≡⟨ ℕ.+-assoc (fst a +ℕ fst a₁) (snd b) (snd b₁) ⟩
+                                   fst a +ℕ fst a₁ +ℕ snd b +ℕ snd b₁   ≡⟨ cong (λ x → x +ℕ snd b₁) (sym (ℕ.+-assoc (fst a) (fst a₁) (snd b))) ⟩
+                                   fst a +ℕ (fst a₁ +ℕ snd b) +ℕ snd b₁ ≡⟨ cong (λ x → fst a +ℕ x +ℕ snd b₁) (ℕ.+-comm (fst a₁) (snd b)) ⟩
+                                   fst a +ℕ (snd b +ℕ fst a₁) +ℕ snd b₁ ≡⟨ cong (λ x → x +ℕ snd b₁) (ℕ.+-assoc (fst a) (snd b) (fst a₁)) ⟩
+                                   fst a +ℕ snd b +ℕ fst a₁ +ℕ snd b₁   ≡⟨ cong (λ x → x +ℕ fst a₁ +ℕ snd b₁) (r) ⟩
+                                   fst b +ℕ snd a +ℕ fst a₁ +ℕ snd b₁   ≡⟨ sym (ℕ.+-assoc (fst b +ℕ snd a) (fst a₁) (snd b₁)) ⟩
+                                   fst b +ℕ snd a +ℕ (fst a₁ +ℕ snd b₁) ≡⟨ cong (λ x →  fst b +ℕ snd a +ℕ x) (r₁) ⟩
+                                   fst b +ℕ snd a +ℕ (fst b₁ +ℕ snd a₁) ≡⟨ ℕ.+-assoc (fst b +ℕ snd a) (fst b₁) (snd a₁) ⟩
+                                   fst b +ℕ snd a +ℕ fst b₁ +ℕ snd a₁   ≡⟨ cong (λ x → x +ℕ snd a₁) (sym (ℕ.+-assoc (fst b) (snd a) (fst b₁))) ⟩
+                                   fst b +ℕ (snd a +ℕ fst b₁) +ℕ snd a₁ ≡⟨ cong (λ x → fst b +ℕ x +ℕ snd a₁) (ℕ.+-comm (snd a) (fst b₁)) ⟩
+                                   fst b +ℕ (fst b₁ +ℕ snd a) +ℕ snd a₁ ≡⟨ cong (λ x → x +ℕ snd a₁) (ℕ.+-assoc (fst b) (fst b₁) (snd a)) ⟩
+                                   fst b +ℕ fst b₁ +ℕ snd a +ℕ snd a₁   ≡⟨ sym (ℕ.+-assoc (fst b +ℕ fst b₁) (snd a) (snd a₁)) ⟩
+                                   fst b +ℕ fst b₁ +ℕ (snd a +ℕ snd a₁) ∎
+eq/ a b r i +ℤ squash/ c c₁ p q i₁ i₂ = squash/ ([ a ] +ℤ c) ([ b ] +ℤ c₁) (+-rewrite-4 [ a ] [ b ] c c₁ (eq/ a b r) p) (+-rewrite-4 [ a ] [ b ] c c₁ (eq/ a b r) q) {!!} {!!}
+    where
+      +-rewrite-4 : ∀ a b c d → a ≡ b → c ≡ d → a +ℤ c ≡ b +ℤ d
+      +-rewrite-4 a b c d p q =
+        a +ℤ c ≡⟨ cong (λ x → a +ℤ x) (q) ⟩
+        a +ℤ d ≡⟨ cong (λ x → x +ℤ d) (p) ⟩
+        b +ℤ d ∎
+squash/ a a₁ p q i i₁ +ℤ [ a₂ ] = squash/ (a +ℤ [ a₂ ]) (a₁ +ℤ [ a₂ ]) (cong (λ x → x +ℤ [ a₂ ]) (p)) (cong (λ x → x +ℤ [ a₂ ]) (q)) i i₁
+squash/ a a₁ p q i i₁ +ℤ eq/ a₂ b r i₂ = squash/ (a +ℤ [ a₂ ]) (a₁ +ℤ [ b ]) (+-rewrite-4 a a₁ [ a₂ ] [ b ] p (eq/ a₂ b r)) (+-rewrite-4 a a₁ [ a₂ ] [ b ] q (eq/ a₂ b r)) {!!} {!!}
+    where
+      +-rewrite-4 : ∀ a b c d → a ≡ b → c ≡ d → a +ℤ c ≡ b +ℤ d
+      +-rewrite-4 a b c d p q =
+        a +ℤ c ≡⟨ cong (λ x → a +ℤ x) (q) ⟩
+        a +ℤ d ≡⟨ cong (λ x → x +ℤ d) (p) ⟩
+        b +ℤ d ∎
+squash/ a a₁ p q i i₁ +ℤ squash/ c c₁ p₁ q₁ i₂ i₃ = squash/ (a +ℤ c) (a₁ +ℤ c₁) (+-rewrite-4 a a₁ c c₁ p p₁) (+-rewrite-4 a a₁ c c₁ q q₁) {!!} {!!}
+    where
+      +-rewrite-4 : ∀ a b c d → a ≡ b → c ≡ d → a +ℤ c ≡ b +ℤ d
+      +-rewrite-4 a b c d p q =
+        a +ℤ c ≡⟨ cong (λ x → a +ℤ x) (q) ⟩
+        a +ℤ d ≡⟨ cong (λ x → x +ℤ d) (p) ⟩
+        b +ℤ d ∎
