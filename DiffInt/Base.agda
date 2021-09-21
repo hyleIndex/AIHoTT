@@ -97,3 +97,19 @@ squash/ a a₁ p q i i₁ +ℤ squash/ c c₁ p₁ q₁ i₂ i₃ = squash/ (a +
         a +ℤ c ≡⟨ cong (λ x → a +ℤ x) (q) ⟩
         a +ℤ d ≡⟨ cong (λ x → x +ℤ d) (p) ⟩
         b +ℤ d ∎
+
+
+-ℤ'_  : ℤ → ℤ
+-ℤ' [ a ] = [ snd a , fst a ]
+-ℤ' eq/ a b r i = eq/ (snd a , fst a) (snd b , fst b) (tmp a b r) i
+                                                      where
+                                                        tmp : ∀ a b → fst a +ℕ snd b ≡ fst b +ℕ snd a → snd a +ℕ fst b ≡ snd b +ℕ fst a
+                                                        tmp a b r =
+                                                          snd a +ℕ fst b ≡⟨ ℕ.+-comm (snd a) (fst b) ⟩
+                                                          fst b +ℕ snd a ≡⟨ sym r ⟩
+                                                          fst a +ℕ snd b ≡⟨ ℕ.+-comm (fst a) (snd b) ⟩
+                                                          snd b +ℕ fst a ∎
+-ℤ' squash/ a a₁ p q i i₁ = squash/ (-ℤ' a) (-ℤ' a₁) (cong (λ x → -ℤ' x) p) (cong (λ x → -ℤ' x) q) i i₁
+
+_-ℤ_ : ℤ → ℤ → ℤ
+a -ℤ b = a +ℤ (-ℤ' b)
