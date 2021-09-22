@@ -83,7 +83,8 @@ eq/ a b r i +ℤ eq/ a₁ b₁ r₁ i₁ = isSet→isSet' ℤ-isSet (eq/ (a +ℕ
 -- i₂ = i1 ⊢ eq/ a b r i +ℤ c₁                 
 eq/ a b r i +ℤ squash/ c c₁ p q i₁ i₂ = isGroupoid→isGroupoid' ℤ-isGroupoid (squash/ ([ a ] +ℤ c) ([ a ] +ℤ c₁) (λ i₃ → [ a ] +ℤ p i₃) (λ i₃ → [ a ] +ℤ q i₃))
                                                                            (squash/ ([ b ] +ℤ c) ([ b ] +ℤ c₁) (λ i₃ → [ b ] +ℤ p i₃) (λ i₃ → [ b ] +ℤ q i₃))
-                                                                           {!!} {!!} {!!} {!!}
+                                                                          -- (λ i₃ i₄ → eq/ a b r i₃ +ℤ p i₄) (λ i₃ i₄ → eq/ a b r i₃ +ℤ q i₄) (λ i₃ i₄ → eq/ a b r i₃ +ℤ c) (λ i₃ i₄ → eq/ a b r i₃ +ℤ c₁)
+                                                                            ? ? ? ?
                                                                             i i₁ i₂
 
 squash/ a a₁ p q i i₁ +ℤ [ a₂ ] = squash/ (a +ℤ [ a₂ ]) (a₁ +ℤ [ a₂ ]) (cong (λ x → x +ℤ [ a₂ ]) (p)) (cong (λ x → x +ℤ [ a₂ ]) (q)) i i₁
@@ -97,7 +98,9 @@ squash/ a a₁ p q i i₁ +ℤ [ a₂ ] = squash/ (a +ℤ [ a₂ ]) (a₁ +ℤ [
 -- i₂ = i1 ⊢ squash/ (a +ℤ [ b ]) (a₁ +ℤ [ b ]) (λ i₃ → p i₃ +ℤ [ b ])
 --          (λ i₃ → q i₃ +ℤ [ b ]) i i₁
 
-squash/ a a₁ p q i i₁ +ℤ eq/ a₂ b r i₂ = isGroupoid→isGroupoid' ℤ-isGroupoid {!!} {!!} {!!} {!!}
+squash/ a a₁ p q i i₁ +ℤ eq/ a₂ b r i₂ = isGroupoid→isGroupoid' ℤ-isGroupoid
+                                                                            -- (λ i₃ i₄ → p i₃ +ℤ eq/ a₂ b r i₄) (λ i₃ i₄ → q i₃ +ℤ eq/ a₂ b r i₄) (λ i₃ i₄ → a +ℤ (eq/ a₂ b r i₄)) (λ i₃ i₄ → ?)
+                                                                            ? ? ? ?
                                                                             (squash/ (a +ℤ [ a₂ ]) (a₁ +ℤ [ a₂ ]) (λ i₃ → p i₃ +ℤ [ a₂ ]) (λ i₃ → q i₃ +ℤ [ a₂ ]))
                                                                             (squash/ (a +ℤ [ b ]) (a₁ +ℤ [ b ]) (λ i₃ → p i₃ +ℤ [ b ]) (λ i₃ → q i₃ +ℤ [ b ]))
                                                                             i i₁ i₂ 
