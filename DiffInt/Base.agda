@@ -59,114 +59,59 @@ _+ℕ'_ : (ℕ × ℕ) → (ℕ × ℕ) → (ℕ × ℕ)
   fst y +ℕ fst z +ℕ (snd x +ℕ snd z) ∎
 
 _+ℤ_ : ℤ → ℤ → ℤ
-[ a ] +ℤ [ a₁ ] = [ a +ℕ' a₁ ]
+[ x ] +ℤ [ y ] = [ x +ℕ' y ]
 
-[ a ] +ℤ eq/ a₁ b r i = eq/ (a +ℕ' a₁) (a +ℕ' b) (+-assoc-3-1 a a₁ b r) i
-                            
-[ a ] +ℤ squash/ c c₁ p q i i₁ = squash/ ( [ a ] +ℤ c) ([ a ] +ℤ c₁) (cong (λ x → [ a ] +ℤ x) (p)) (cong (λ x → [ a ] +ℤ x) (q)) i i₁
+[ x ] +ℤ eq/ y₁ y₂ r j = eq/ (x +ℕ' y₁) (x +ℕ' y₂) (+-assoc-3-1 x y₁ y₂ r) j
 
-eq/ a b r i +ℤ [ a₁ ] = eq/ (a +ℕ' a₁) (b +ℕ' a₁)
-                            (+-assoc-3-2 a b a₁ r) i
+[ x ] +ℤ squash/ y₁ y₂ p q j j₁ = squash/ ([ x ] +ℤ y₁) ([ x ] +ℤ y₂) ((cong (λ y → [ x ] +ℤ y)) p) ((cong (λ y → [ x ] +ℤ y)) q) j j₁
 
-eq/ a b r i +ℤ eq/ a₁ b₁ r₁ i₁ = isSet→isSet' ℤ-isSet (eq/ (a +ℕ' a₁) (a +ℕ' b₁) (+-assoc-3-1 a a₁ b₁ r₁))
-                                                     (eq/ (b +ℕ' a₁) (b +ℕ' b₁) (+-assoc-3-1 b a₁ b₁ r₁))
-                                                     (eq/ (a +ℕ' a₁) (b +ℕ' a₁) (+-assoc-3-2 a b a₁ r))
-                                                     (eq/ (a +ℕ' b₁) (b +ℕ' b₁) (+-assoc-3-2 a b b₁ r))
-                                                     i i₁
--- i = i0 ⊢ squash/ ([ a ] +ℤ c) ([ a ] +ℤ c₁) (λ i₃ → [ a ] +ℤ p i₃)
---          (λ i₃ → [ a ] +ℤ q i₃) i₁ i₂
--- i = i1 ⊢ squash/ ([ b ] +ℤ c) ([ b ] +ℤ c₁) (λ i₃ → [ b ] +ℤ p i₃)
---          (λ i₃ → [ b ] +ℤ q i₃) i₁ i₂
--- i₁ = i0 ⊢ eq/ a b r i +ℤ p i₂
--- i₁ = i1 ⊢ eq/ a b r i +ℤ q i₂
--- i₂ = i0 ⊢ eq/ a b r i +ℤ c
--- i₂ = i1 ⊢ eq/ a b r i +ℤ c₁
+eq/ x₁ x₂ r i +ℤ [ y ] = eq/ (x₁ +ℕ' y) (x₂ +ℕ' y) (+-assoc-3-2 x₁ x₂ y r) i
 
--- ?0
---   : Square (λ i₃ → [ a ] +ℤ p i₃) (λ i₃ → [ b ] +ℤ p i₃) ([ a ] +ℤ c) ≡ ([ b ] +ℤ c)
---     ([ a ] +ℤ c₁) ≡ ([ b ] +ℤ c₁)
--- ?1
---   : Square (λ i₃ → [ a ] +ℤ q i₃) (λ i₃ → [ b ] +ℤ q i₃) ([ a ] +ℤ c) ≡ ([ b ] +ℤ c)
---    ([ a ] +ℤ c₁) ≡ ([ b ] +ℤ c₁)
--- ?2
---   : Square (λ i₃ → [ a ] +ℤ c) (λ i₃ → [ b ] +ℤ c) ([ a ] +ℤ c) ≡ ([ b ] +ℤ c)
---     ([ a ] +ℤ c) ≡ ([ b ] +ℤ c)
--- ?3
---   : Square (λ i₃ → [ a ] +ℤ c₁) (λ i₃ → [ b ] +ℤ c₁) ([ a ] +ℤ c₁) ≡ ([ b ] +ℤ c₁)
---    ([ a ] +ℤ c₁) ≡ ([ b ] +ℤ c₁)
+-- i = i0 ⊢ eq/ (x₁ +ℕ' y₁) (x₁ +ℕ' y₂) (+-assoc-3-1 x₁ y₁ y₂ r₁) j
+-- i = i1 ⊢ eq/ (x₂ +ℕ' y₁) (x₂ +ℕ' y₂) (+-assoc-3-1 x₂ y₁ y₂ r₁) j
+-- j = i0 ⊢ eq/ (x₁ +ℕ' y₁) (x₂ +ℕ' y₁) (+-assoc-3-2 x₁ x₂ y₁ r) i
+-- j = i1 ⊢ eq/ (x₁ +ℕ' y₂) (x₂ +ℕ' y₂) (+-assoc-3-2 x₁ x₂ y₂ r) i
 
-eq/ a b r i +ℤ squash/ c c₁ p q i₁ i₂ = isGroupoid→isGroupoid' ℤ-isGroupoid (squash/ ([ a ] +ℤ c) ([ a ] +ℤ c₁) (λ i₃ → [ a ] +ℤ p i₃) (λ i₃ → [ a ] +ℤ q i₃))
-                                                                           (squash/ ([ b ] +ℤ c) ([ b ] +ℤ c₁) (λ i₃ → [ b ] +ℤ p i₃) (λ i₃ → [ b ] +ℤ q i₃))
-                                                                          -- (λ i₃ i₄ → eq/ a b r i₃ +ℤ p i₄) (λ i₃ i₄ → eq/ a b r i₃ +ℤ q i₄) (λ i₃ i₄ → eq/ a b r i₃ +ℤ c) (λ i₃ i₄ → eq/ a b r i₃ +ℤ c₁)
-                                                                            (eq+eq-1 [ a ] [ b ] c c₁ (eq/ a b r) p) (eq+eq-1 [ a ] [ b ] c c₁ (eq/ a b r) q) (eq+eq-2 [ a ] [ b ] c (eq/ a b r)) (eq+eq-2 [ a ] [ b ] c₁ (eq/ a b r))
-                                                                            i i₁ i₂
-                                       where
-                                         eq+eq-1 : ∀ ( x₁ x₂  y₁ y₂ : ℤ ) → ( p : x₁ ≡ x₂ ) → ( q : y₁ ≡ y₂ )
-                                                 → Square {- (i = i0) -} (λ k → x₁ +ℤ q k)
-                                                          {- (i = i1) -} (λ k → x₂ +ℤ q k)
-                                                          {- (j = i0) -} (cong (λ x → x +ℤ y₁) p)
-                                                          {- (j = i1) -} (cong (λ x → x +ℤ y₂) p)
-                                         eq+eq-1 x₁ x₂ y₁ p q i j = {!p!}
-                                         eq+eq-2 : ∀ ( x₁ x₂  y₁ : ℤ ) → ( p : x₁ ≡ x₂ )
-                                                 → Square {- (i = i0) -} (λ k → x₁ +ℤ y₁)
-                                                          {- (i = i1) -} (λ k → x₂ +ℤ y₁)
-                                                          {- (j = i0) -} (cong (λ x → x +ℤ y₁) p)
-                                                          {- (j = i1) -} (cong (λ x → x +ℤ y₁) p)
-                                         eq+eq-2 x₁ x₂ y₁ p i j = {!!}
+eq/ x₁ x₂ r i +ℤ eq/ y₁ y₂ r₁ j = isSet→isSet' ℤ-isSet
+                                  (eq/ (x₁ +ℕ' y₁) (x₁ +ℕ' y₂) (+-assoc-3-1 x₁ y₁ y₂ r₁))
+                                  (eq/ (x₂ +ℕ' y₁) (x₂ +ℕ' y₂) (+-assoc-3-1 x₂ y₁ y₂ r₁))
+                                  (eq/ (x₁ +ℕ' y₁) (x₂ +ℕ' y₁) (+-assoc-3-2 x₁ x₂ y₁ r))
+                                  (eq/ (x₁ +ℕ' y₂) (x₂ +ℕ' y₂) (+-assoc-3-2 x₁ x₂ y₂ r))
+                                 i j
 
-squash/ a a₁ p q i i₁ +ℤ [ a₂ ] = squash/ (a +ℤ [ a₂ ]) (a₁ +ℤ [ a₂ ]) (cong (λ x → x +ℤ [ a₂ ]) (p)) (cong (λ x → x +ℤ [ a₂ ]) (q)) i i₁
+-- i = i0 ⊢ squash/ ([ x₁ ] +ℤ y₁) ([ x₁ ] +ℤ y₂)
+--          (λ i₁ → [ x₁ ] +ℤ p i₁) (λ i₁ → [ x₁ ] +ℤ q i₁) j₁ j₂
+-- i = i1 ⊢ squash/ ([ x₂ ] +ℤ y₁) ([ x₂ ] +ℤ y₂)
+--          (λ i₁ → [ x₂ ] +ℤ p i₁) (λ i₁ → [ x₂ ] +ℤ q i₁) j₁ j₂
+-- j₁ = i0 ⊢ eq/ x₁ x₂ r i +ℤ p j₂
+-- j₁ = i1 ⊢ eq/ x₁ x₂ r i +ℤ q j₂
+-- j₂ = i0 ⊢ eq/ x₁ x₂ r i +ℤ y₁
+-- j₂ = i1 ⊢ eq/ x₁ x₂ r i +ℤ y₂
 
--- i = i0 ⊢ p i₁ +ℤ eq/ a₂ b r i₂
--- i = i1 ⊢ q i₁ +ℤ eq/ a₂ b r i₂
--- i₁ = i0 ⊢ a +ℤ eq/ a₂ b r i₂
--- i₁ = i1 ⊢ a₁ +ℤ eq/ a₂ b r i₂
--- i₂ = i0 ⊢ squash/ (a +ℤ [ a₂ ]) (a₁ +ℤ [ a₂ ])
---           (λ i₃ → p i₃ +ℤ [ a₂ ]) (λ i₃ → q i₃ +ℤ [ a₂ ]) i i₁
--- i₂ = i1 ⊢ squash/ (a +ℤ [ b ]) (a₁ +ℤ [ b ]) (λ i₃ → p i₃ +ℤ [ b ])
---          (λ i₃ → q i₃ +ℤ [ b ]) i i₁
+eq/ x₁ x₂ r i +ℤ squash/ y₁ y₂ p q j₁ j₂ = isGroupoid→isGroupoid' ℤ-isGroupoid
+                                           (squash/ ([ x₁ ] +ℤ y₁) ([ x₁ ] +ℤ y₂) (λ i₁ → [ x₁ ] +ℤ p i₁) (λ i₁ → [ x₁ ] +ℤ q i₁))
+                                           (squash/ ([ x₂ ] +ℤ y₁) ([ x₂ ] +ℤ y₂) (λ i₁ → [ x₂ ] +ℤ p i₁) (λ i₁ → [ x₂ ] +ℤ q i₁))
+                                           (λ k₁ k₂ → (eq/ x₁ x₂ r k₁) +ℤ p k₂)
+                                           (λ k₁ k₂ → eq/ x₁ x₂ r k₁ +ℤ q k₂)
+                                           (λ k₁ k₂ → eq/ x₁ x₂ r k₁ +ℤ y₁)
+                                           (λ k₁ k₂ → eq/ x₁ x₂ r k₁ +ℤ y₂)
+                                         i j₁ j₂
 
--- ?4
---   : Square (a +ℤ [ a₂ ]) ≡ (a +ℤ [ b ]) (a₁ +ℤ [ a₂ ]) ≡ (a₁ +ℤ [ b ]) (λ i₃ → p i₃ +ℤ [ a₂ ])
---     (λ i₃ → p i₃ +ℤ [ b ])
--- ?5
---   : Square (a +ℤ [ a₂ ]) ≡ (a +ℤ [ b ]) (a₁ +ℤ [ a₂ ]) ≡ (a₁ +ℤ [ b ]) (λ i₃ → q i₃ +ℤ [ a₂ ])
---     (λ i₃ → q i₃ +ℤ [ b ])
--- ?6
---   : Square (a +ℤ [ a₂ ]) ≡ (a +ℤ [ b ]) (a +ℤ [ a₂ ]) ≡ (a +ℤ [ b ]) (λ i₃ → a +ℤ [ a₂ ])
---     (λ i₃ → a +ℤ [ b ])
--- ?7
---   : Square (a₁ +ℤ [ a₂ ]) ≡ (a₁ +ℤ [ b ]) (a₁ +ℤ [ a₂ ]) ≡ (a₁ +ℤ [ b ]) (λ i₃ → a₁ +ℤ [ a₂ ])
---     (λ i₃ → a₁ +ℤ [ b ])
+squash/ x₁ x₂ p q i i₁ +ℤ [ y ] = squash/ (x₁ +ℤ [ y ]) (x₂ +ℤ [ y ]) ((cong (λ x → x +ℤ [ y ])) p) ((cong (λ x → x +ℤ [ y ])) q) i i₁
 
-squash/ a a₁ p q i i₁ +ℤ eq/ a₂ b r i₂ = isGroupoid→isGroupoid' ℤ-isGroupoid
-                                                                            -- (λ i₃ i₄ → p i₃ +ℤ eq/ a₂ b r i₄) (λ i₃ i₄ → q i₃ +ℤ eq/ a₂ b r i₄) (λ i₃ i₄ → a +ℤ (eq/ a₂ b r i₄)) (λ i₃ i₄ → ?)
-                                                                            {!eq+eq-1 a a₁ [ a₂ ] [ b ] p (eq/ a₂ b r)!} {!!} {!!} {!!}
-                                                                            (squash/ (a +ℤ [ a₂ ]) (a₁ +ℤ [ a₂ ]) (λ i₃ → p i₃ +ℤ [ a₂ ]) (λ i₃ → q i₃ +ℤ [ a₂ ]))
-                                                                            (squash/ (a +ℤ [ b ]) (a₁ +ℤ [ b ]) (λ i₃ → p i₃ +ℤ [ b ]) (λ i₃ → q i₃ +ℤ [ b ]))
-                                                                            i i₁ i₂
-                                       where
-                                         eq+eq-1 : ∀ ( x₁ x₂  y₁ y₂ : ℤ ) → ( p : x₁ ≡ x₂ ) → ( q : y₁ ≡ y₂ )
-                                                 → Square {- (i = i0) -} (cong (λ y → x₁ +ℤ y) q)
-                                                          {- (i = i1) -} (cong (λ y → x₂ +ℤ y) q)
-                                                          {- (j = i0) -} (λ k → p k +ℤ y₁)
-                                                          {- (j = i1) -} (λ k → p k +ℤ y₂)
-                                         eq+eq-1 x₁ x₂ y₁ p q i j = {!!}
-                                         eq+eq-2 : ∀ ( x₁ x₂  y₁ : ℤ ) → ( p : x₁ ≡ x₂ )
-                                                 → Square {- (i = i0) -} (λ k → x₁ +ℤ y₁)
-                                                          {- (i = i1) -} (λ k → x₂ +ℤ y₁)
-                                                          {- (j = i0) -} (cong (λ x → x +ℤ y₁) p)
-                                                          {- (j = i1) -} (cong (λ x → x +ℤ y₁) p)
-                                         eq+eq-2 x₁ x₂ y₁ p i j = {!!}
+-- i = i0 ⊢ p i₁ +ℤ eq/ y₁ y₂ r j
+-- i = i1 ⊢ q i₁ +ℤ eq/ y₁ y₂ r j
+-- i₁ = i0 ⊢ x₁ +ℤ eq/ y₁ y₂ r j
+-- i₁ = i1 ⊢ x₂ +ℤ eq/ y₁ y₂ r j
+-- j = i0 ⊢ squash/ (x₁ +ℤ [ y₁ ]) (x₂ +ℤ [ y₁ ])
+--          (λ i₂ → p i₂ +ℤ [ y₁ ]) (λ i₂ → q i₂ +ℤ [ y₁ ]) i i₁
+-- j = i1 ⊢ squash/ (x₁ +ℤ [ y₂ ]) (x₂ +ℤ [ y₂ ])
+--          (λ i₂ → p i₂ +ℤ [ y₂ ]) (λ i₂ → q i₂ +ℤ [ y₂ ]) i i₁
 
--- i = i0 ⊢ p i₁ +ℤ squash/ c c₁ p₁ q₁ i₂ i₃
--- i = i1 ⊢ q i₁ +ℤ squash/ c c₁ p₁ q₁ i₂ i₃
--- i₁ = i0 ⊢ a +ℤ squash/ c c₁ p₁ q₁ i₂ i₃
--- i₁ = i1 ⊢ a₁ +ℤ squash/ c c₁ p₁ q₁ i₂ i₃
--- i₂ = i0 ⊢ squash/ a a₁ p q i i₁ +ℤ p₁ i₃
--- i₂ = i1 ⊢ squash/ a a₁ p q i i₁ +ℤ q₁ i₃
--- i₃ = i0 ⊢ squash/ a a₁ p q i i₁ +ℤ c
--- i₃ = i1 ⊢ squash/ a a₁ p q i i₁ +ℤ c₁
-squash/ a a₁ p q i i₁ +ℤ squash/ c c₁ p₁ q₁ i₂ i₃ = {!!}
+squash/ x₁ x₂ p q i i₁ +ℤ eq/ y₁ y₂ r j = isGroupoid→isGroupoid' ℤ-isGroupoid
+                                          (λ k₁ k₂ → p k₁ +ℤ eq/ y₁ y₂ r k₂) (λ k₁ k₂ → {!q k₁ +ℤ eq/ y₁ y₂ r k₂!}) {!!} {!!} {!!} {!!} {!!} {!!} {!!}
+
+squash/ x₁ x₂ p q i i₁ +ℤ squash/ y₁ y₂ p₁ q₁ j₁ j₂ = {!!}
 
 
 -ℤ'_  : ℤ → ℤ
