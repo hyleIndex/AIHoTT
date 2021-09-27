@@ -126,15 +126,15 @@ _+_ = sym→lemma (λ { (x , x') (c , d) → x +ℕ c })
 test : [ 3 , 9 ] + [ 10 , 14 ] ≡ [ 0 , 10 ]
 test = ℤ-cancelˡ 13
 
-zero-[a,a]ˡ-lem : (a : ℕ)(b : ℤ)(( c , d ) : ℕ × ℕ) → [ c , d ] ≡ b  → [ a , a ] + b ≡ b
-zero-[a,a]ˡ-lem a b (c , d) p =
+zero-[a,a]ˡ-lem : (a : ℕ)(b : ℤ) → (∃[ (c , d) ∈ ℕ × ℕ ] [ (c , d) ] ≡ b)  → [ a , a ] + b ≡ b
+zero-[a,a]ˡ-lem a b ((c , d) , p) =
   [ a , a ] + b           ≡⟨ cong (λ x → [ a , a ] + x) (sym(p)) ⟩
   [ a , a ] + [ c , d ]   ≡⟨ ℤ-cancelˡ a ⟩
   [ c , d ]               ≡⟨ p ⟩
   b ∎
 
 zero-[a,a]ˡ : (a : ℕ)(b : ℤ) → [ a , a ] + b ≡ b
-zero-[a,a]ˡ a b = zero-[a,a]ˡ-lem a b {!!} {!!} 
+zero-[a,a]ˡ a b = zero-[a,a]ˡ-lem a b ([]surjective b)
 
 -ℤ'_  : ℤ → ℤ
 -ℤ' [ a ] = [ snd a , fst a ]
