@@ -78,8 +78,32 @@ _+ℕ'_ : (ℕ × ℕ) → (ℕ × ℕ) → (ℕ × ℕ)
   fst z +ℕ fst y +ℕ (snd x +ℕ snd z)   ≡⟨ cong (λ x' → x' +ℕ (snd x +ℕ snd z)) (ℕ.+-comm (fst z) (fst y)) ⟩
   fst y +ℕ fst z +ℕ (snd x +ℕ snd z) ∎
 
+-- SM: copied from library Cubical.HITs.SetQuotients.Properties (I don't have it in my version)
+SQrec : ∀ {ℓ} {A : Type ℓ} {R : A → A → Type ℓ}
+      {B : Type ℓ}
+      (Bset : isSet B)
+      (f : A → B)
+      (feq : (a b : A) (r : R a b) → f a ≡ f b)
+    → A / R → B
+SQrec Bset f feq [ a ] = f a
+SQrec Bset f feq (eq/ a b r i) = feq a b r i
+SQrec Bset f feq (squash/ x y p q i j) = Bset (g x) (g y) (cong g p) (cong g q) i j
+  where
+  g = SQrec Bset f feq
+
+SQrec2 : ∀ {ℓ} {A : Type ℓ} {R : A → A → Type ℓ}
+       {B : Type ℓ} (Bset : isSet B)
+       (f : A → A → B) (feql : (a b c : A) (r : R a b) → f a c ≡ f b c)
+                       (feqr : (a b c : A) (r : R b c) → f a b ≡ f a c)
+    → A / R → A / R → B
+SQrec2 Bset f feql feqr = SQrec (isSetΠ (λ _ → Bset))
+                            (λ a → SQrec Bset (f a) (feqr a))
+                            (λ a b r → funExt (elimProp (λ _ → Bset _ _)
+                                              (λ c → feql a b c r)))
+-- SM: end of the copy
+
 _+_ : ℤ → ℤ → ℤ
-_+_ = SetQuotient.rec2 ℤ-isSet (λ x y → [ x +ℕ' y ]) feql feqr
+_+_ = SQrec2 ℤ-isSet (λ x y → [ x +ℕ' y ]) feql feqr
   where
     feql : (a b c : ℕ × ℕ) (r : rel a b) → [ a +ℕ' c ] ≡ [ b +ℕ' c ]
     feql a b c r = eq/ (a +ℕ' c) (b +ℕ' c) (+-assoc-3-2 a b c r)
