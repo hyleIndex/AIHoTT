@@ -12,6 +12,7 @@ open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Univalence
 
 open import Cubical.HITs.SetQuotients as SetQuotient
+open import Cubical.HITs.PropositionalTruncation as PropositionalTruncation
 open import Cubical.Foundations.Isomorphism
 
 open import Cubical.Data.Sigma
@@ -55,86 +56,65 @@ _+ℕ'_ : (ℕ × ℕ) → (ℕ × ℕ) → (ℕ × ℕ)
             ≡⟨ cong (λ x → a +ℕ x) (ℕ.+-comm c b) ⟩
           a +ℕ (b +ℕ c) ∎
 
-lemma : (g : ℕ × ℕ → ℕ × ℕ → ℕ)
-        (g-eql : ∀ ((x , x') (y , y') (z , z') : ℕ × ℕ) (p : x +ℕ y' ≡ y +ℕ x')
-                 → y' +ℕ (g (x , x') (z , z')) ≡ x' +ℕ (g (y , y') (z , z')))
-        (g-eqr : ∀ ((x , x') (y , y') (z , z') : ℕ × ℕ) (p : y +ℕ z' ≡ z +ℕ y')
-                 → (g (x , x') (y , y')) +ℕ z' ≡ (g (x , x') (z , z')) +ℕ y')
-        → ℤ → ℤ → ℤ
-lemma g g-eql g-eqr = rec2 ℤ-isSet (λ (x , x') (y , y') → [ g (x , x') (y , y') -ℕ' (x' +ℕ y') ])
-                                   (λ (x , x') (y , y') (z , z') r → eql (x , x') (y , y') (z , z') r)
-                                   (λ (x , x') (y , y') (z , z') p → eqr (x , x') (y , y') (z , z') p )
-                                   where
-                                     eql : ∀ ((x , x') (y , y') (z , z') : ℕ × ℕ) (p : x +ℕ y' ≡ y +ℕ x')
-                                           → [ g (x , x') (z , z') -ℕ' x' +ℕ z' ] ≡ [ g (y , y') (z , z') -ℕ' y' +ℕ z' ]
-                                     eql (x , x') (y , y') (z , z') p =
-                                       [ g (x , x') (z , z') -ℕ' x' +ℕ z' ]
-                                         ≡⟨ sym (ℤ-cancelˡ y') ⟩
-                                       [ y' +ℕ (g (x , x') (z , z')) -ℕ' y' +ℕ (x' +ℕ z') ]
-                                         ≡[ i ]⟨ [ y' +ℕ (g (x , x') (z , z')) -ℕ' ℕ.+-assoc y' x' z' i ] ⟩
-                                       [ y' +ℕ (g (x , x') (z , z')) -ℕ' (y' +ℕ x') +ℕ z' ]
-                                         ≡[ i ]⟨ [ g-eql (x , x') (y , y') (z , z') p i -ℕ' ℕ.+-comm y' x' i +ℕ z' ] ⟩
-                                       [ x' +ℕ (g (y , y') (z , z')) -ℕ' (x' +ℕ y') +ℕ z' ]
-                                         ≡[ i ]⟨ [ x' +ℕ (g (y , y') (z , z')) -ℕ' ℕ.+-assoc x' y' z' (~ i) ] ⟩
-                                       [ x' +ℕ (g (y , y') (z , z')) -ℕ' x' +ℕ (y' +ℕ z') ]
-                                         ≡⟨ ℤ-cancelˡ x' ⟩
-                                       [ g (y , y') (z , z') -ℕ' y' +ℕ z' ] ∎
-                                     eqr : ∀ ((x , x') (y , y') (z , z') : ℕ × ℕ) (p : y +ℕ z' ≡ z +ℕ y')
-                                           → [ g (x , x') (y , y') -ℕ' x' +ℕ y' ] ≡ [ g (x , x') (z , z') -ℕ' x' +ℕ z' ]
-                                     eqr (x , x') (y , y') (z , z') p =
-                                       [ g (x , x') (y , y') -ℕ' x' +ℕ y' ]
-                                         ≡⟨ sym (ℤ-cancelʳ z') ⟩
-                                       [ (g (x , x') (y , y')) +ℕ z' -ℕ' (x' +ℕ y') +ℕ z' ]
-                                         ≡[ i ]⟨ [ (g (x , x') (y , y')) +ℕ z' -ℕ' ℕ.+-assoc x' y' z' (~ i) ] ⟩
-                                       [ (g (x , x') (y , y')) +ℕ z' -ℕ' x' +ℕ (y' +ℕ z') ]
-                                         ≡[ i ]⟨ [ g-eqr (x , x') (y , y') (z , z') p i -ℕ' x' +ℕ ℕ.+-comm y' z' i ] ⟩
-                                       [ (g (x , x') (z , z')) +ℕ y' -ℕ' x' +ℕ (z' +ℕ y') ]
-                                         ≡[ i ]⟨ [ (g (x , x') (z , z')) +ℕ y' -ℕ' ℕ.+-assoc x' z' y' i ] ⟩
-                                       [ (g (x , x') (z , z')) +ℕ y' -ℕ' (x' +ℕ z') +ℕ y' ]
-                                         ≡⟨ ℤ-cancelʳ y' ⟩
-                                       [ g (x , x') (z , z') -ℕ' x' +ℕ z' ] ∎
++-assoc-3-1 : ∀ x y z → rel y z → rel (x +ℕ' y) (x +ℕ' z)
++-assoc-3-1 x y z  p =
+  (fst x +ℕ fst y) +ℕ (snd x +ℕ snd z) ≡⟨ cong (λ x' → (fst x +ℕ fst y) +ℕ x') (ℕ.+-comm (snd x) (snd z)) ⟩
+  (fst x +ℕ fst y) +ℕ (snd z +ℕ snd x) ≡⟨ ℕ.+-assoc (fst x +ℕ fst y) (snd z) (snd x) ⟩
+  fst x +ℕ fst y +ℕ snd z +ℕ snd x     ≡⟨ cong (λ x' → x' +ℕ snd x) (sym (ℕ.+-assoc (fst x) (fst y) (snd z))) ⟩
+  fst x +ℕ (fst y +ℕ snd z) +ℕ snd x   ≡⟨ cong (λ x' → fst x +ℕ x' +ℕ snd x) p ⟩
+  fst x +ℕ (fst z +ℕ snd y) +ℕ snd x   ≡⟨ cong (λ x' → x' +ℕ snd x) (ℕ.+-assoc (fst x) (fst z) (snd y)) ⟩
+  fst x +ℕ fst z +ℕ snd y +ℕ snd x     ≡⟨ sym (ℕ.+-assoc (fst x +ℕ fst z) (snd y) (snd x)) ⟩
+  fst x +ℕ fst z +ℕ (snd y +ℕ snd x)   ≡⟨ cong (λ x' → fst x +ℕ fst z +ℕ x') (ℕ.+-comm (snd y) (snd x)) ⟩
+  fst x +ℕ fst z +ℕ (snd x +ℕ snd y) ∎
 
-sym→lemma : (g : ℕ × ℕ → ℕ × ℕ → ℕ)
-            (g-sym : ∀ x y → g x y ≡ g y x)
-            (g-eql : ∀ ((x , x') (y , y') (z , z') : ℕ × ℕ) (p : x +ℕ y' ≡ y +ℕ x')
-                     → y' +ℕ (g (x , x') (z , z')) ≡ x' +ℕ (g (y , y') (z , z')))
-            → ℤ → ℤ → ℤ
-sym→lemma g g-sym g-eql = lemma g g-eql q-eqr
-                            where
-                              q-eqr : ∀ ((x , x') (y , y') (z , z') : ℕ × ℕ) (p : y +ℕ z' ≡ z +ℕ y')
-                                      → (g (x , x') (y , y')) +ℕ z' ≡ (g (x , x') (z , z')) +ℕ y'
-                              q-eqr (x , x') (y , y') (z , z') p =
-                                (g (x , x') (y , y')) +ℕ z' ≡[ i ]⟨ ℕ.+-comm (g-sym (x , x') (y , y') i) (z') i ⟩
-                                z' +ℕ (g (y , y') (x , x')) ≡⟨ g-eql (y , y') (z , z') (x , x') p ⟩
-                                y' +ℕ (g (z , z') (x , x')) ≡[ i ]⟨ ℕ.+-comm (y') (g-sym (z , z') (x , x') i) i ⟩
-                                (g (x , x') (z , z')) +ℕ y' ∎
++-assoc-3-2 : ∀ x y z → rel x y → rel (x +ℕ' z) (y +ℕ' z)
++-assoc-3-2 x y z p =
+  (fst x +ℕ fst z) +ℕ (snd y +ℕ snd z) ≡⟨ cong (λ x' → x' +ℕ (snd y +ℕ snd z)) (ℕ.+-comm (fst x) (fst z)) ⟩
+  (fst z +ℕ fst x) +ℕ (snd y +ℕ snd z) ≡⟨ ℕ.+-assoc (fst z +ℕ fst x) (snd y) (snd z) ⟩
+  fst z +ℕ fst x +ℕ snd y +ℕ snd z     ≡⟨ cong (λ x' → x' +ℕ snd z) (sym (ℕ.+-assoc (fst z) (fst x) (snd y))) ⟩
+  fst z +ℕ (fst x +ℕ snd y) +ℕ snd z   ≡⟨ cong (λ x' → fst z +ℕ x' +ℕ snd z) p ⟩
+  fst z +ℕ (fst y +ℕ snd x) +ℕ snd z   ≡⟨ cong (λ x' → x' +ℕ snd z) (ℕ.+-assoc (fst z) (fst y) (snd x)) ⟩
+  fst z +ℕ fst y +ℕ snd x +ℕ snd z     ≡⟨ sym (ℕ.+-assoc (fst z +ℕ fst y) (snd x) (snd z)) ⟩
+  fst z +ℕ fst y +ℕ (snd x +ℕ snd z)   ≡⟨ cong (λ x' → x' +ℕ (snd x +ℕ snd z)) (ℕ.+-comm (fst z) (fst y)) ⟩
+  fst y +ℕ fst z +ℕ (snd x +ℕ snd z) ∎
 
 _+_ : ℤ → ℤ → ℤ
-_+_ = sym→lemma (λ { (x , x') (c , d) → x +ℕ c })
-                (λ { (x , x') (c , d) → ℕ.+-comm x c })
-                (λ { (x , x') (c , d) (e , f) p → tmp (x , x') (c , d) (e , f) p})
-                where
-                  tmp : ∀ ((x , x') (c , d) (e , f) : ℕ × ℕ) → x +ℕ d ≡ c +ℕ x' → d +ℕ (x +ℕ e) ≡ x' +ℕ (c +ℕ e)
-                  tmp (x , x') (c , d) (e , f) p =
-                    d +ℕ (x +ℕ e) ≡⟨ ℕ.+-assoc d x e ⟩
-                    d +ℕ x +ℕ e   ≡⟨ cong (λ x → x +ℕ e) (ℕ.+-comm d x) ⟩
-                    x +ℕ d +ℕ e   ≡⟨ cong (λ x → x +ℕ e) p ⟩
-                    c +ℕ x' +ℕ e  ≡⟨ cong (λ x → x +ℕ e) (ℕ.+-comm c x') ⟩
-                    x' +ℕ c +ℕ e  ≡⟨ sym(ℕ.+-assoc x' c e) ⟩
-                    x' +ℕ (c +ℕ e) ∎
+_+_ = SetQuotient.rec2 ℤ-isSet (λ x y → [ x +ℕ' y ]) feql feqr
+  where
+    feql : (a b c : ℕ × ℕ) (r : rel a b) → [ a +ℕ' c ] ≡ [ b +ℕ' c ]
+    feql a b c r = eq/ (a +ℕ' c) (b +ℕ' c) (+-assoc-3-2 a b c r)
+    feqr : (a b c : ℕ × ℕ) (r : rel b c) → [ a +ℕ' b ] ≡ [ a +ℕ' c ]
+    feqr a b c r = eq/ (a +ℕ' b) (a +ℕ' c) (+-assoc-3-1 a b c r)
 
 test : [ 3 , 9 ] + [ 10 , 14 ] ≡ [ 0 , 10 ]
 test = ℤ-cancelˡ 13
 
-zero-[a,a]ˡ-lem : (a : ℕ)(b : ℤ) → (∃[ (c , d) ∈ ℕ × ℕ ] [ (c , d) ] ≡ b)  → [ a , a ] + b ≡ b
-zero-[a,a]ˡ-lem a b ((c , d) , p) =
+zero-[a,a]ˡ-lem : (a : ℕ)(b : ℤ) → (Σ (ℕ × ℕ) ( λ (c , d) → [ (c , d) ]  ≡ b )) → [ a , a ] + b ≡ b
+zero-[a,a]ˡ-lem a b ( (c , d) , p ) = 
   [ a , a ] + b           ≡⟨ cong (λ x → [ a , a ] + x) (sym(p)) ⟩
   [ a , a ] + [ c , d ]   ≡⟨ ℤ-cancelˡ a ⟩
   [ c , d ]               ≡⟨ p ⟩
   b ∎
 
 zero-[a,a]ˡ : (a : ℕ)(b : ℤ) → [ a , a ] + b ≡ b
-zero-[a,a]ˡ a b = zero-[a,a]ˡ-lem a b ([]surjective b)
+zero-[a,a]ˡ a b = PropositionalTruncation.rec (lem2 a b) (zero-[a,a]ˡ-lem a b) (SetQuotient.[]surjective b)
+                                               where
+                                                 lem2 : (a : ℕ) (b : ℤ) → isProp ([ a , a ] + b ≡ b)
+                                                 lem2 a b = λ x y i i₁ → squash/ ([ a , a ] + b) b x y i i₁
+
+zero-[a,a]ʳ-lem : (a : ℕ)(b : ℤ) → (Σ (ℕ × ℕ) ( λ (c , d) → [ (c , d) ]  ≡ b )) → b + [ a , a ] ≡ b
+zero-[a,a]ʳ-lem a b ( (c , d) , p ) = 
+  b + [ a , a ]           ≡⟨ cong (λ x → x + [ a , a ]) (sym(p)) ⟩
+  [ c , d ] + [ a , a ]   ≡⟨ ℤ-cancelʳ a ⟩
+  [ c , d ]               ≡⟨ p ⟩
+  b ∎
+
+zero-[a,a]ʳ : (a : ℕ)(b : ℤ) → b + [ a , a ] ≡ b
+zero-[a,a]ʳ a b = PropositionalTruncation.rec (lem2 a b) (zero-[a,a]ʳ-lem a b) (SetQuotient.[]surjective b)
+                                               where
+                                                 lem2 : (a : ℕ) (b : ℤ) → isProp (b + [ a , a ] ≡ b)
+                                                 lem2 a b = λ x y i i₁ → squash/ (b + [ a , a ]) b x y i i₁
+
 
 -ℤ'_  : ℤ → ℤ
 -ℤ' [ a ] = [ snd a , fst a ]
