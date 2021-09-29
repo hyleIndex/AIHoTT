@@ -25,6 +25,7 @@ rel (a₀ , b₀) (a₁ , b₁) = x ≡ y
     x = a₀ +ℕ b₁
     y = a₁ +ℕ b₀
 
+
 ℤ = (ℕ × ℕ) / rel
 
 ℤ-isSet : isSet ℤ
@@ -57,8 +58,8 @@ _+ℕ'_ : (ℕ × ℕ) → (ℕ × ℕ) → (ℕ × ℕ)
           a +ℕ (b +ℕ c) ∎
 
 -- right congruence
-+-assoc-3-1 : ∀ x y z → rel y z → rel (x +ℕ' y) (x +ℕ' z)
-+-assoc-3-1 x y z  p =
++-right-congruence : ∀ x y z → rel y z → rel (x +ℕ' y) (x +ℕ' z)
++-right-congruence x y z  p =
   (fst x +ℕ fst y) +ℕ (snd x +ℕ snd z) ≡⟨ cong (λ x' → (fst x +ℕ fst y) +ℕ x') (ℕ.+-comm (snd x) (snd z)) ⟩
   (fst x +ℕ fst y) +ℕ (snd z +ℕ snd x) ≡⟨ ℕ.+-assoc (fst x +ℕ fst y) (snd z) (snd x) ⟩
   fst x +ℕ fst y +ℕ snd z +ℕ snd x     ≡⟨ cong (λ x' → x' +ℕ snd x) (sym (ℕ.+-assoc (fst x) (fst y) (snd z))) ⟩
@@ -68,8 +69,8 @@ _+ℕ'_ : (ℕ × ℕ) → (ℕ × ℕ) → (ℕ × ℕ)
   fst x +ℕ fst z +ℕ (snd y +ℕ snd x)   ≡⟨ cong (λ x' → fst x +ℕ fst z +ℕ x') (ℕ.+-comm (snd y) (snd x)) ⟩
   fst x +ℕ fst z +ℕ (snd x +ℕ snd y) ∎
 
-+-assoc-3-2 : ∀ x y z → rel x y → rel (x +ℕ' z) (y +ℕ' z)
-+-assoc-3-2 x y z p =
++-left-congruence : ∀ x y z → rel x y → rel (x +ℕ' z) (y +ℕ' z)
++-left-congruence x y z p =
   (fst x +ℕ fst z) +ℕ (snd y +ℕ snd z) ≡⟨ cong (λ x' → x' +ℕ (snd y +ℕ snd z)) (ℕ.+-comm (fst x) (fst z)) ⟩
   (fst z +ℕ fst x) +ℕ (snd y +ℕ snd z) ≡⟨ ℕ.+-assoc (fst z +ℕ fst x) (snd y) (snd z) ⟩
   fst z +ℕ fst x +ℕ snd y +ℕ snd z     ≡⟨ cong (λ x' → x' +ℕ snd z) (sym (ℕ.+-assoc (fst z) (fst x) (snd y))) ⟩
@@ -101,28 +102,15 @@ SQrec2 Bset f feql feqr = SQrec (isSetΠ (λ _ → Bset))
                             (λ a → SQrec Bset (f a) (feqr a))
                             (λ a b r → funExt (elimProp (λ _ → Bset _ _)
                                               (λ c → feql a b c r)))
-
-SQrec2' : ∀ {ℓ} {A : Type ℓ} {R : A → A → Type ℓ}
-       {B : Type ℓ} (Bset : isSet B)
-       (f : A → A → B) (feql : (a b c : A) (r : R a b) → f a c ≡ f b c)
-                       (feqr : (a b c : A) (r : R b c) → f a b ≡ f a c)
-       → A / R → A / R → B
-SQrec2' Bset f feql feqr [ a ] [ a₁ ] = f a a₁
-SQrec2' Bset f feql feqr [ a ] (eq/ a₁ b r i) = feqr a a₁ b r i
-SQrec2' Bset f feql feqr [ a ] (squash/ b b₁ p q i i₁) = {!!} -- isSet→isSet' Bset _ _ _ _ i i₁
-SQrec2' Bset f feql feqr (eq/ a b₁ r i) b = {!!}
-SQrec2' Bset f feql feqr (squash/ a a₁ p q i i₁) [ a₂ ] = {!!}
-SQrec2' Bset f feql feqr (squash/ a a₁ p q i i₁) (eq/ a₂ b r i₂) = {!!}
-SQrec2' Bset f feql feqr (squash/ a a₁ p q i i₁) (squash/ b b₁ p₁ q₁ i₂ i₃) = {!!}
 -- SM: end of the copy
 
 _+_ : ℤ → ℤ → ℤ
 _+_ = SQrec2 ℤ-isSet (λ x y → [ x +ℕ' y ]) feql feqr
   where
     feql : (a b c : ℕ × ℕ) (r : rel a b) → [ a +ℕ' c ] ≡ [ b +ℕ' c ]
-    feql a b c r = eq/ (a +ℕ' c) (b +ℕ' c) (+-assoc-3-2 a b c r)
+    feql a b c r = eq/ (a +ℕ' c) (b +ℕ' c) (+-left-congruence a b c r)
     feqr : (a b c : ℕ × ℕ) (r : rel b c) → [ a +ℕ' b ] ≡ [ a +ℕ' c ]
-    feqr a b c r = eq/ (a +ℕ' b) (a +ℕ' c) (+-assoc-3-1 a b c r)
+    feqr a b c r = eq/ (a +ℕ' b) (a +ℕ' c) (+-right-congruence a b c r)
 
 test : [ 3 , 9 ] + [ 10 , 14 ] ≡ [ 0 , 10 ]
 test = ℤ-cancelˡ 13
@@ -138,13 +126,7 @@ zero-[a,a]ˡ : (a : ℕ) (b : ℤ) → [ a , a ] + b ≡ b
 zero-[a,a]ˡ a b = PropositionalTruncation.rec (lem2 a b) (zero-[a,a]ˡ-lem a b) (SetQuotient.[]surjective b)
                                                where
                                                  lem2 : (a : ℕ) (b : ℤ) → isProp ([ a , a ] + b ≡ b)
-                                                 -- lem2 a b = λ x y i i₁ → squash/ ([ a , a ] + b) b x y i i₁
                                                  lem2 a b = ℤ-isSet ([ a , a ] + b) b
-
--- zero-[a,a]ˡ' : (a : ℕ)(b : ℤ) → [ a , a ] + b ≡ b
--- zero-[a,a]ˡ' a [ b , b' ] = ℤ-cancelˡ a
--- zero-[a,a]ˡ' a (eq/ a₁ b r i) = {!!} -- ℤ-isSet _ _ _ _ i
--- zero-[a,a]ˡ' a (squash/ b b₁ p q i i₁) = {!!}
 
 zero-[a,a]ʳ-lem : (a : ℕ)(b : ℤ) → (Σ (ℕ × ℕ) ( λ (c , d) → [ (c , d) ]  ≡ b )) → b + [ a , a ] ≡ b
 zero-[a,a]ʳ-lem a b ( (c , d) , p ) = 
@@ -157,7 +139,7 @@ zero-[a,a]ʳ : (a : ℕ)(b : ℤ) → b + [ a , a ] ≡ b
 zero-[a,a]ʳ a b = PropositionalTruncation.rec (lem2 a b) (zero-[a,a]ʳ-lem a b) (SetQuotient.[]surjective b)
                                                where
                                                  lem2 : (a : ℕ) (b : ℤ) → isProp (b + [ a , a ] ≡ b)
-                                                 lem2 a b = λ x y i i₁ → squash/ (b + [ a , a ]) b x y i i₁
+                                                 lem2 a b = ℤ-isSet (b + [ a , a ]) b
 
 
 -ℤ'_  : ℤ → ℤ
@@ -175,26 +157,61 @@ zero-[a,a]ʳ a b = PropositionalTruncation.rec (lem2 a b) (zero-[a,a]ʳ-lem a b)
 _-_ : ℤ → ℤ → ℤ
 a - b = a + (-ℤ' b)
 
--- your goal :)
+open import Cubical.Algebra.Group.Base
+open import Cubical.Algebra.Monoid.Base
+open import Cubical.Algebra.Semigroup
 
-open import Cubical.Data.Group
+-ℤ'-invʳ-lem : (b : ℤ) → (Σ (ℕ × ℕ) ( λ (c , d) → [ (c , d) ]  ≡ b )) → b + (-ℤ' b) ≡ [ 0 , 0 ]
+-ℤ'-invʳ-lem b ( (c , d) , p ) = 
+  b + (-ℤ' b)
+    ≡⟨ cong (λ x → x + (-ℤ' b)) (sym p) ⟩
+  [ c , d ] + (-ℤ' b)
+    ≡⟨ cong (λ x → [ c , d ] + (-ℤ' x)) (sym p) ⟩
+  [ c +ℕ d , d +ℕ c ]
+    ≡⟨ cong (λ x → [ c +ℕ d , x ]) (ℕ.+-comm d c) ⟩
+  [ c +ℕ d , c +ℕ d ]
+    ≡⟨ ℤ-cancelˡ c ⟩
+  [ d -ℕ' d ]
+    ≡⟨ sym(ℤ-cancelʳ 0) ⟩
+  [ d +ℕ 0 -ℕ' d +ℕ 0 ]
+    ≡⟨ ℤ-cancelˡ d ⟩
+  [ 0 , 0 ] ∎ 
 
-ℤ-isGroup : isGroup ℤ
-isGroup.id ℤ-isGroup = [ 0 , 0 ]
-isGroup.inv ℤ-isGroup = -ℤ'_
-isGroup.comp ℤ-isGroup = _+_
-isGroup.lUnit ℤ-isGroup = zero-[a,a]ˡ 0
-isGroup.rUnit ℤ-isGroup = zero-[a,a]ʳ 0
-isGroup.assoc ℤ-isGroup = {!!}
-isGroup.lCancel ℤ-isGroup = {!!}
-isGroup.rCancel ℤ-isGroup = {!!}
+-ℤ'-invʳ : (b : ℤ) → b + (-ℤ' b) ≡ [ 0 , 0 ]
+-ℤ'-invʳ b = PropositionalTruncation.rec (lem2 b) (-ℤ'-invʳ-lem b) (SetQuotient.[]surjective b)
+                                               where
+                                                 lem2 : (b : ℤ) → isProp (b + (-ℤ' b) ≡ [ 0 , 0 ])
+                                                 lem2 b = ℤ-isSet (b + (-ℤ' b)) [ 0 , 0 ]
 
--- another goal :)
+-ℤ'-invˡ-lem : (b : ℤ) → (Σ (ℕ × ℕ) ( λ (c , d) → [ (c , d) ]  ≡ b )) → (-ℤ' b) + b ≡ [ 0 , 0 ]
+-ℤ'-invˡ-lem b ( (c , d) , p ) = 
+  (-ℤ' b) + b
+    ≡⟨ cong (λ x → (-ℤ' b) + x) (sym p) ⟩
+  (-ℤ' b) + [ c , d ]
+    ≡⟨ cong (λ x → (-ℤ' x) + [ c , d ]) (sym p) ⟩
+  [ d +ℕ c , c +ℕ d ]
+    ≡⟨ cong (λ x → [ x , c +ℕ d ]) (ℕ.+-comm d c) ⟩
+  [ c +ℕ d , c +ℕ d ]
+    ≡⟨ ℤ-cancelˡ c ⟩
+  [ d -ℕ' d ]
+    ≡⟨ sym(ℤ-cancelʳ 0) ⟩
+  [ d +ℕ 0 -ℕ' d +ℕ 0 ]
+    ≡⟨ ℤ-cancelˡ d ⟩
+  [ 0 , 0 ] ∎
 
-open import Cubical.Relation.Nullary
-open import Cubical.Relation.Nullary.DecidableEq
+ℤ+-assoc : ∀ x y z → x + (y + z) ≡ (x + y) + z
+ℤ+-assoc = SetQuotient.elimProp3 (λ _ _ _ → ℤ-isSet _ _)
+  (λ { (a , b) (c , d) (e , f) i → [ ℕ.+-assoc a c e i -ℕ' ℕ.+-assoc b d f i ] })
 
-ℤ-Discrete : Discrete ℤ
-ℤ-Discrete = {!!}
 
--- TODO: also for the +1 / -1 definition of ℤ
+-ℤ'-invˡ : (b : ℤ) → (-ℤ' b) + b ≡ [ 0 , 0 ]
+-ℤ'-invˡ b = PropositionalTruncation.rec (lem2 b) (-ℤ'-invˡ-lem b) (SetQuotient.[]surjective b)
+                                               where
+                                                 lem2 : (b : ℤ) → isProp ((-ℤ' b) + b ≡ [ 0 , 0 ])
+                                                 lem2 b = ℤ-isSet ((-ℤ' b) + b) [ 0 , 0 ]
+
+ℤ-isGroup : IsGroup {G = ℤ} [ 0 , 0 ] _+_ -ℤ'_
+IsSemigroup.is-set (IsMonoid.isSemigroup (IsGroup.isMonoid ℤ-isGroup)) = ℤ-isSet
+IsSemigroup.assoc (IsMonoid.isSemigroup (IsGroup.isMonoid ℤ-isGroup)) = ℤ+-assoc
+IsMonoid.identity (IsGroup.isMonoid ℤ-isGroup) = λ x → (zero-[a,a]ʳ 0 x  , zero-[a,a]ˡ 0 x)
+IsGroup.inverse ℤ-isGroup = λ x → (-ℤ'-invʳ x , -ℤ'-invˡ x)
