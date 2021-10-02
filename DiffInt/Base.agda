@@ -199,19 +199,29 @@ open import Cubical.Algebra.Semigroup
     ≡⟨ ℤ-cancelˡ d ⟩
   [ 0 , 0 ] ∎
 
-ℤ+-assoc : ∀ x y z → x + (y + z) ≡ (x + y) + z
-ℤ+-assoc = SetQuotient.elimProp3 (λ _ _ _ → ℤ-isSet _ _)
-  (λ { (a , b) (c , d) (e , f) i → [ ℕ.+-assoc a c e i -ℕ' ℕ.+-assoc b d f i ] })
-
-
 -ℤ'-invˡ : (b : ℤ) → (-ℤ' b) + b ≡ [ 0 , 0 ]
 -ℤ'-invˡ b = PropositionalTruncation.rec (lem2 b) (-ℤ'-invˡ-lem b) (SetQuotient.[]surjective b)
                                                where
                                                  lem2 : (b : ℤ) → isProp ((-ℤ' b) + b ≡ [ 0 , 0 ])
                                                  lem2 b = ℤ-isSet ((-ℤ' b) + b) [ 0 , 0 ]
 
+ℤ+-assoc : ∀ x y z → x + (y + z) ≡ (x + y) + z
+ℤ+-assoc = SetQuotient.elimProp3 (λ _ _ _ → ℤ-isSet _ _)
+  (λ { (a , b) (c , d) (e , f) i → [ ℕ.+-assoc a c e i -ℕ' ℕ.+-assoc b d f i ] })
+
 ℤ-isGroup : IsGroup {G = ℤ} [ 0 , 0 ] _+_ -ℤ'_
 IsSemigroup.is-set (IsMonoid.isSemigroup (IsGroup.isMonoid ℤ-isGroup)) = ℤ-isSet
 IsSemigroup.assoc (IsMonoid.isSemigroup (IsGroup.isMonoid ℤ-isGroup)) = ℤ+-assoc
 IsMonoid.identity (IsGroup.isMonoid ℤ-isGroup) = λ x → (zero-[a,a]ʳ 0 x  , zero-[a,a]ˡ 0 x)
 IsGroup.inverse ℤ-isGroup = λ x → (-ℤ'-invʳ x , -ℤ'-invˡ x)
+
+open import Cubical.Relation.Binary.Base
+open import Cubical.Relation.Nullary
+
+rel-isEquivRel : BinaryRelation.isEquivRel rel
+BinaryRelation.isEquivRel.reflexive rel-isEquivRel = λ ( a , b ) → refl
+BinaryRelation.isEquivRel.symmetric rel-isEquivRel = λ ( a , b ) ( c , d ) → sym
+BinaryRelation.isEquivRel.transitive rel-isEquivRel = ?
+
+ℤ-discrete : Discrete ℤ
+ℤ-discrete = discreteSetQuotients (discreteΣ discreteℕ λ _ → discreteℕ) (λ _ _ → isSetℕ _ _) rel-isEquivRel (λ _ _ → discreteℕ _ _)
