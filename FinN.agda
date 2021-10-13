@@ -39,9 +39,9 @@ fsuc (x ∷ xs) = Unit.tt ∷ (x ∷ xs)
 fsuc (comm x y xs i) = cong (λ ys → Unit.tt ∷ ys) (comm x y xs) i
 fsuc (trunc xs ys p q i j) = isOfHLevel→isOfHLevelDep 2 (λ a xs ys p q → trunc xs ys p q) (fsuc xs) (fsuc ys) (cong fsuc p) (cong fsuc q) (trunc xs ys p q) i j
 
-toNat : ℕ → Nat
-toNat zero = fzero
-toNat (suc x) = fsuc (toNat x)
+fromℕ : ℕ → Nat
+fromℕ zero = fzero
+fromℕ (suc x) = fsuc (fromℕ x)
 
 toℕ : Nat → ℕ
 toℕ [] = zero
