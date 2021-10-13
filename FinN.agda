@@ -46,5 +46,5 @@ toNat (suc x) = fsuc (toNat x)
 toℕ : Nat → ℕ
 toℕ [] = zero
 toℕ (x ∷ xs) = suc (toℕ xs)
-toℕ (comm x y xs i) = {!!}
-toℕ (trunc xs ys p q i j) = isOfHLevel→isOfHLevelDep 2 (λ a x y p q → isSetℕ x y p q) (toℕ xs) (toℕ ys) (cong toℕ p) (cong toℕ q) (trunc xs ys p q) i j
+toℕ (comm x y xs i) = suc (suc (toℕ xs))
+toℕ (trunc xs ys p q i j) = isOfHLevel→isOfHLevelDep 2 (λ _ → isSetℕ) (toℕ xs) (toℕ ys) (cong toℕ p) (cong toℕ q) (trunc xs ys p q) i j
