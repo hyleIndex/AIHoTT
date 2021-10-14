@@ -1,6 +1,7 @@
 {-# OPTIONS --cubical #-}
 
 open import Cubical.Foundations.Prelude
+open import Cubical.Data.List
 
 record Group A : Type where
   field
@@ -44,3 +45,17 @@ freeGroup A = record
   ; inv-r = :inv-r:
   ; assoc = :assoc:
   }
+
+data FG A : Type where
+  Pos : List A -> FG A
+  Neg : List A -> FG A
+  e : Pos [] ≡ Neg []
+
+module FGVsHITGro {A : Type} (AIsSet : isSet A) where
+  listIsSet : isSet (List A)
+  listIsSet = isOfHLevelList 0 AIsSet
+
+  fromFG : FG A → HITGro A
+  fromFG (Pos x) = {!!}
+  fromFG (Neg x) = {!!}
+  fromFG (e i) = {!!}
