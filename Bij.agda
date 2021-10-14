@@ -21,26 +21,26 @@ data 𝔹 : Type₁ where
 data Bij : Type₁
 Bij-fromℕ : ℕ → Bij
 ladd : ℕ → Bij → Bij
-s' : Bij → Bij
+suc' : Bij → Bij
 
 ladd zero n = n
-ladd (suc k) n = s' (ladd k n)
+ladd (suc k) n = suc' (ladd k n)
 
 data Bij where
   zero : Bij
   suc : Bij → Bij
-  swap : (n : Bij) → s' (s' n) ≡ s' (s' n)
+  swap : (n : Bij) → suc' (suc' n) ≡ suc' (suc' n)
   -- * * k * * n
-  axiom : {k : ℕ} {n : Bij} → refl {x = ladd (suc zero) n} ≡ refl {x = s' n}
+  axiom : {k : ℕ} {n : Bij} → refl {x = ladd (suc zero) n} ≡ refl {x = suc' n}
   xchg : {k : ℕ} {n : Bij} →
-         cong (ladd (suc (suc k))) (swap n) ∙ swap (ladd k (s' (s' n))) ≡
-         swap (ladd k (s' (s' n))) ∙ cong (ladd (suc (suc k))) (swap n)
+         cong (ladd (suc (suc k))) (swap n) ∙ swap (ladd k (suc' (suc' n))) ≡
+         swap (ladd k (suc' (suc' n))) ∙ cong (ladd (suc (suc k))) (swap n)
   gpd : {m n : ℕ} {p q : Bij-fromℕ m ≡ Bij-fromℕ n} (α β : p ≡ q) → α ≡ β
 
 Bij-fromℕ zero = zero
 Bij-fromℕ (suc n) = suc (Bij-fromℕ n)
 
-s' = suc
+suc' = suc
 
 thm : 𝔹 ≡ Bij
 thm = {!!}
