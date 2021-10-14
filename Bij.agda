@@ -19,17 +19,23 @@ data 𝔹 : Type₁ where
 
 data Bij : Type₁
 Bij-fromℕ : ℕ → Bij
+ladd : ℕ → Bij → Bij
 
 data Bij where
   zero : Bij
   suc : Bij → Bij
   swap : (n : Bij) → suc (suc n) ≡ suc (suc n)
   -- * * k * * n
-  -- xchg : {n k : ℕ} → cong (λ m → 2 + k + m) (swap n) ∙ swap (k + 2 + n) ≡ swap (k + 2 + n) ∙ cong (λ m → 2 + k + m) (swap n)
+  xchg : {k : ℕ} {n : Bij} →
+         cong (ladd (suc (suc k))) (swap n) ∙ {!swap (ladd k (suc (suc n)))!} ≡
+         {!swap (ladd k (suc (suc n)))!} ∙ cong (ladd (suc (suc k))) (swap n)
   gpd : {m n : ℕ} {p q : Bij-fromℕ m ≡ Bij-fromℕ n} (α β : p ≡ q) → α ≡ β
 
 Bij-fromℕ zero = zero
 Bij-fromℕ (suc n) = suc (Bij-fromℕ n)
+
+ladd zero n = n
+ladd (suc k) n = suc (ladd k n)
 
 thm : 𝔹 ≡ Bij
 thm = {!!}
