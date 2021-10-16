@@ -1,9 +1,14 @@
 {-# OPTIONS --cubical #-}
 
-open import Cubical.Foundations.Prelude
+open import Cubical.Core.Everything
+open import Cubical.Foundations.Everything hiding (Type; assoc; _∘_; ⟨_⟩)
 open import Cubical.Data.List
 
-record Group A : Type where
+variable
+  ℓ ℓ′ : Level
+  A B C T : Type₀
+
+record Group A : Type₀ where
   field
     set : isSet A
 
@@ -19,7 +24,7 @@ record Group A : Type where
 
 open Group {{...}}
 
-data HITGro A : Type where
+data HITGro A : Type₀ where
   ⟨_⟩   : A → HITGro A
   :ε:   : HITGro A
   _:∘:_  : HITGro A → HITGro A → HITGro A
@@ -45,6 +50,25 @@ freeGroup A = record
   ; inv-r = :inv-r:
   ; assoc = :assoc:
   }
+
+elimProp : (P : HITGro A → Type) → (∀ x → isProp (P x))
+             → (∀ x → P ⟨ x ⟩) → P :ε: → (∀ x y → P x → P y → P (x :∘: y)) → (∀ x → P x → P (:-: x)) → ∀ x → P x
+elimProp P PIsProp P⟨_⟩ Pe P∘ Pinv = go
+  where
+    go : ∀ x → P x
+    go ⟨ x ⟩ = P⟨_⟩ x
+    go :ε: = Pe
+    go (x :∘: y) = P∘ x y (go x) (go y)
+    go (:-: x) = Pinv x (go x)
+    go (:unit-l: x i) = isProp→PathP (λ j → PIsProp (:unit-l: x j)) (P∘ _ _ Pe (go x)) (go x) i
+    go (:unit-r: x i) = isProp→PathP (λ j → PIsProp (:unit-r: x j)) (P∘ _ _ (go x) Pe) (go x) i
+    go (:inv-l: x i) = isProp→PathP (λ j → PIsProp (:inv-l: x j)) (P∘ _ _ (go x) (Pinv _ (go x))) (Pe) i
+    go (:inv-r: x i) = isProp→PathP (λ j → PIsProp (:inv-r: x j)) (P∘ _ _ (Pinv _ (go x)) (go x)) (Pe) i
+    go (:assoc: x y z i) = isProp→PathP (λ j → PIsProp (:assoc: x y z j)) (P∘ _ _ (P∘ _ _ (go x) (go y)) (go z)) (P∘ _ _ (go x) (P∘ _ _ (go y) (go z))) i
+    go (trunc x y p q i j) = r (go x) (go y) (cong go p) (cong go q) (trunc x y p q) i j
+      where
+        r : isOfHLevelDep 2 P
+        r = isOfHLevel→isOfHLevelDep 2 (λ a → isProp→isSet (PIsProp a))
 
 data FG A : Type where
   Pos : List A -> FG A
