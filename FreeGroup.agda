@@ -65,10 +65,7 @@ elimProp P PIsProp P⟨_⟩ Pe P∘ Pinv = go
     go (:inv-l: x i) = isProp→PathP (λ j → PIsProp (:inv-l: x j)) (P∘ _ _ (go x) (Pinv _ (go x))) (Pe) i
     go (:inv-r: x i) = isProp→PathP (λ j → PIsProp (:inv-r: x j)) (P∘ _ _ (Pinv _ (go x)) (go x)) (Pe) i
     go (:assoc: x y z i) = isProp→PathP (λ j → PIsProp (:assoc: x y z j)) (P∘ _ _ (P∘ _ _ (go x) (go y)) (go z)) (P∘ _ _ (go x) (P∘ _ _ (go y) (go z))) i
-    go (trunc x y p q i j) = r (go x) (go y) (cong go p) (cong go q) (trunc x y p q) i j
-      where
-        r : isOfHLevelDep 2 P
-        r = isOfHLevel→isOfHLevelDep 2 (λ a → isProp→isSet (PIsProp a))
+    go (trunc x y p q i j) = isOfHLevel→isOfHLevelDep 2 (λ a → isProp→isSet (PIsProp a)) (go x) (go y) (cong go p) (cong go q) (trunc x y p q) i j
 
 data FG A : Type where
   Pos : List A -> FG A
