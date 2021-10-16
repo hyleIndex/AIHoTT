@@ -82,6 +82,9 @@ module FGByList {A : Type₀} (AIsSet : isSet A) where
   finv [] = []
   finv (x ∷ xs) = finv xs ++ [ inv x ]
 
+  ++-finv-hom : (s t : FA) → finv (s ++ t) ≡ finv s ++ finv t
+  ++-finv-hom = {!!}
+
   rel : FA → FA → Type₀
   rel s t = Σ[ u ∈ FA ] (Σ[ v ∈ FA ] (Σ[ x ∈ X ] ((s ≡ (u ++ [ x ] ++ [ inv x ] ++ v)) × (t ≡ u ++ v))))
 
@@ -99,9 +102,16 @@ module FGByList {A : Type₀} (AIsSet : isSet A) where
               (λ { x y z i → ∥ ++-assoc x y z i  ∥ })
 
   -FG_ : FG → FG
-  -FG ∥ a ∥ = {!!}
-  -FG eq/ a b r i = {!!}
-  -FG squash/ x x₁ p q i i₁ = {!!}
+  -FG ∥ a ∥ = ∥ finv a ∥
+  -FG eq/ a b r i = eq/ (finv a) (finv b) (lem a b r) i
+    where
+      lem : ∀ a b → rel a b → rel (finv a) (finv b)
+      lem a b (u , v , y , p , q) = (finv u , finv v , y , p' , q')
+        where
+          p' = finv a ≡⟨ cong (finv) p ⟩
+               finv (u ++ y ∷ inv y ∷ v) ≡⟨ {!!} ⟩ {!!} ∎
+          q' = {!!}
+  -FG squash/ x y p q i j = squash/ (-FG x) (-FG y) (cong (λ z → -FG z) p) (cong (λ z → -FG z) q) i j
 
 module FGVsHITGro {A : Type₀} (AIsSet : isSet A) where
   open FGByList {A = A} AIsSet
