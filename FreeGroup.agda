@@ -152,6 +152,15 @@ module FGByList {A : Type₀} (AIsSet : isSet A) where
                finv v ++ finv u ∎
   -FG squash/ x y p q i j = squash/ (-FG x) (-FG y) (cong (λ z → -FG z) p) (cong (λ z → -FG z) q) i j
 
+  inv-invl-lem : ∀ x → rel ([ inv x ] ++  [ x ]) []
+  inv-invl-lem x  = ([] , [] , x , p , refl)
+    where
+      p :  [ inv x ] ++ [ x ] ≡ [] ++ [ x ] ++ [ inv x ] ++ []
+      p = {!!}
+
+  inv-invr-lem : ∀ x → rel ([ x ] ++  [ inv x ]) []
+  inv-invr-lem x  = ([] , [] , x , refl , refl)
+
 module FGVsHITGro {A : Type₀} (AIsSet : isSet A) where
   open FGByList {A = A} AIsSet
 
