@@ -19,8 +19,8 @@ record Group A : Type₀ where
 
     unit-l : ∀ x     → ε ∘ x ≡ x
     unit-r : ∀ x     → x ∘ ε ≡ x
-    inv-l  : ∀ x     → x ∘ (- x) ≡ ε
-    inv-r  : ∀ x     → (- x) ∘ x ≡ ε
+    inv-r  : ∀ x     → x ∘ (- x) ≡ ε
+    inv-l  : ∀ x     → (- x) ∘ x ≡ ε
     assoc  : ∀ x y z → (x ∘ y) ∘ z ≡ x ∘ (y ∘ z)
 
 open Group {{...}}
@@ -33,8 +33,8 @@ data HITGro A : Type₀ where
 
   :unit-l: : ∀ x      → :ε: :∘: x ≡ x
   :unit-r: : ∀ x      → x :∘: :ε: ≡ x
-  :inv-l:  : ∀ x      → x :∘: (:-: x) ≡ :ε:
-  :inv-r:  : ∀ x      → (:-: x) :∘: x ≡ :ε:
+  :inv-r:  : ∀ x      → x :∘: (:-: x) ≡ :ε:
+  :inv-l:  : ∀ x      → (:-: x) :∘: x ≡ :ε:
   :assoc:  : ∀ x y z  → (x :∘: y) :∘: z ≡ x :∘: (y :∘: z)
 
   trunc    : isSet (HITGro A)
@@ -63,8 +63,8 @@ elimFGProp P PIsProp P⟨_⟩ Pe P∘ Pinv = go
     go (:-: x) = Pinv x (go x)
     go (:unit-l: x i) = isProp→PathP (λ j → PIsProp (:unit-l: x j)) (P∘ _ _ Pe (go x)) (go x) i
     go (:unit-r: x i) = isProp→PathP (λ j → PIsProp (:unit-r: x j)) (P∘ _ _ (go x) Pe) (go x) i
-    go (:inv-l: x i) = isProp→PathP (λ j → PIsProp (:inv-l: x j)) (P∘ _ _ (go x) (Pinv _ (go x))) (Pe) i
-    go (:inv-r: x i) = isProp→PathP (λ j → PIsProp (:inv-r: x j)) (P∘ _ _ (Pinv _ (go x)) (go x)) (Pe) i
+    go (:inv-r: x i) = isProp→PathP (λ j → PIsProp (:inv-r: x j)) (P∘ _ _ (go x) (Pinv _ (go x))) (Pe) i
+    go (:inv-l: x i) = isProp→PathP (λ j → PIsProp (:inv-l: x j)) (P∘ _ _ (Pinv _ (go x)) (go x)) (Pe) i
     go (:assoc: x y z i) = isProp→PathP (λ j → PIsProp (:assoc: x y z j)) (P∘ _ _ (P∘ _ _ (go x) (go y)) (go z)) (P∘ _ _ (go x) (P∘ _ _ (go y) (go z))) i
     go (trunc x y p q i j) = isOfHLevel→isOfHLevelDep 2 (λ a → isProp→isSet (PIsProp a)) (go x) (go y) (cong go p) (cong go q) (trunc x y p q) i j
 
@@ -78,12 +78,19 @@ module FGByList {A : Type₀} (AIsSet : isSet A) where
   inv : X → X
   inv (f , x) = (not f , x)
 
+  inv-invol : (x : X) → inv (inv x) ≡ x
+  inv-invol (false , v) = refl
+  inv-invol (true , v) = refl
+
   finv : FA → FA
   finv [] = []
   finv (x ∷ xs) = finv xs ++ [ inv x ]
 
-  ++-finv-hom : (s t : FA) → finv (s ++ t) ≡ finv s ++ finv t
-  ++-finv-hom = {!!}
+  ++-finv-hom : (s t : FA) → finv (s ++ t) ≡ finv t ++ finv s
+  ++-finv-hom [] t = sym (++-unit-r (finv t))
+  ++-finv-hom (x ∷ xs) t = finv (xs ++ t) ++ [ inv x ] ≡⟨ cong (λ y → y ++ [ inv x ]) (++-finv-hom xs t) ⟩
+                           (finv t ++ finv xs) ++ [ inv x ] ≡⟨ ++-assoc (finv t) (finv xs) [ inv x ] ⟩
+                           finv t ++ finv xs ++ [ inv x ]  ∎
 
   rel : FA → FA → Type₀
   rel s t = Σ[ u ∈ FA ] (Σ[ v ∈ FA ] (Σ[ x ∈ X ] ((s ≡ (u ++ [ x ] ++ [ inv x ] ++ v)) × (t ≡ u ++ v))))
@@ -94,8 +101,33 @@ module FGByList {A : Type₀} (AIsSet : isSet A) where
   FG-isSet : isSet FG
   FG-isSet = λ _ _ _ _ → squash/ _ _ _ _
 
+  +-left-congruence : ∀ x x' y → rel x x' → rel (x ++ y) (x' ++ y)
+  +-left-congruence x x' y (u , v , z , p , q) = u , (v ++ y) , z , p' , q'
+    where
+      p' = {!!}
+      q' = {!!}
+
+  +-right-congruence : ∀ x y y' → rel y y' → rel (x ++ y) (x ++ y')
+  +-right-congruence x y y' (u , v , z , p , q) = u , (v ++ y) , z , p' , q'
+    where
+      p' = {!!}
+      q' = {!!}
+
   _+_ : FG → FG → FG
-  _+_ = rec2 FG-isSet (λ x y → ∥ x ++ y ∥) {!!} {!!}
+  _+_ = rec2 FG-isSet (λ x y → ∥ x ++ y ∥) feql feqr
+             where
+               feql : (a b c : FA) (r : rel a b) → ∥ a ++ c ∥ ≡ ∥ b ++ c ∥
+               feql a b c r = eq/ (a ++ c) (b ++ c) (+-left-congruence a b c r)
+               feqr : (a b c : FA) (r : rel b c) → ∥ a ++ b ∥ ≡ ∥ a ++ c ∥
+               feqr a b c r = eq/ (a ++ b) (a ++ c) (+-right-congruence a b c r)
+
+  +-unit-r : ∀ x → x + ∥ [] ∥ ≡ x
+  +-unit-r = SetQuotients.elimProp (λ x → FG-isSet (x + ∥ [] ∥) x)
+              (λ { x i → ∥ ++-unit-r x i ∥ })
+
+  +-unit-l : ∀ x → ∥ [] ∥ + x ≡ x
+  +-unit-l = SetQuotients.elimProp (λ x → FG-isSet (∥ [] ∥ + x) x)
+              (λ { x i → ∥ refl { x = x } i ∥ })
 
   FG+-assoc : ∀ x y z → (x + y) + z ≡ x + (y + z)
   FG+-assoc = SetQuotients.elimProp3 (λ _ _ _ → FG-isSet _ _)
@@ -106,11 +138,18 @@ module FGByList {A : Type₀} (AIsSet : isSet A) where
   -FG eq/ a b r i = eq/ (finv a) (finv b) (lem a b r) i
     where
       lem : ∀ a b → rel a b → rel (finv a) (finv b)
-      lem a b (u , v , y , p , q) = (finv u , finv v , y , p' , q')
+      lem a b (u , v , y , p , q) = (finv v , finv u , y , p' , q')
         where
           p' = finv a ≡⟨ cong (finv) p ⟩
-               finv (u ++ y ∷ inv y ∷ v) ≡⟨ {!!} ⟩ {!!} ∎
-          q' = {!!}
+               finv (u ++ y ∷ inv y ∷ v) ≡⟨ ++-finv-hom u ([ y ] ++ [ inv y ] ++ v) ⟩
+               finv ([ y ] ++ [ inv y ] ++ v) ++ finv u ≡⟨ cong (λ z → ((finv z) ++ (finv u))) (sym (++-assoc [ y ] [ inv y ] v)) ⟩
+               finv (([ y ] ++ [ inv y ]) ++ v) ++ finv u ≡⟨ cong (λ z → z ++ finv u) (++-finv-hom ([ y ] ++ [ inv y ]) v) ⟩
+               (finv v ++ [ inv (inv y) ] ++ [ inv y ]) ++ finv u ≡⟨ cong (λ z → (finv v ++ [ z ] ++ [ inv y ]) ++ finv u) (inv-invol y) ⟩
+               (finv v ++ [ y ] ++ [ inv y ]) ++ finv u ≡⟨ ++-assoc (finv v) ([ y ] ++ [ inv y ]) (finv u) ⟩
+               finv v ++ [ y ] ++ [ inv y ] ++ finv u     ∎
+          q' = finv b ≡⟨ cong finv q ⟩
+               finv (u ++ v) ≡⟨ ++-finv-hom u v ⟩
+               finv v ++ finv u ∎
   -FG squash/ x y p q i j = squash/ (-FG x) (-FG y) (cong (λ z → -FG z) p) (cong (λ z → -FG z) q) i j
 
 module FGVsHITGro {A : Type₀} (AIsSet : isSet A) where
@@ -121,8 +160,8 @@ module FGVsHITGro {A : Type₀} (AIsSet : isSet A) where
   toFG :ε: = ∥ [] ∥
   toFG (x :∘: y) = (toFG x) + (toFG y)
   toFG (:-: x) = -FG (toFG x)
-  toFG (:unit-l: x i) = {!!}
-  toFG (:unit-r: x i) = {!!}
+  toFG (:unit-l: x i) = +-unit-l (toFG x) i
+  toFG (:unit-r: x i) = +-unit-r (toFG x) i
   toFG (:inv-l: x i) = {!!}
   toFG (:inv-r: x i) = {!!}
   toFG (:assoc: x y z i) = FG+-assoc (toFG x) (toFG y) (toFG z) i
@@ -135,7 +174,10 @@ module FGVsHITGro {A : Type₀} (AIsSet : isSet A) where
     fromFA ((true , x) ∷ xs) = ⟨ x ⟩ :∘: (fromFA xs)
 
     inv→inv : (x : X) → fromFA ([ x ] ++ [ inv x ]) ≡ :ε:
-    inv→inv (true , x) = {!(⟨ x ⟩) :∘: ((:-: ⟨ x ⟩) :∘: :ε:) ≡⟨?⟩ ? ∎!}
+    inv→inv (true , x) = (⟨ x ⟩) :∘: ((:-: ⟨ x ⟩) :∘: :ε:) ≡⟨ sym(:assoc: ⟨ x ⟩ (:-: ⟨ x ⟩) :ε:)  ⟩
+                         (⟨ x ⟩ :∘: (:-: ⟨ x ⟩)) :∘: :ε: ≡⟨ :unit-r: (⟨ x ⟩ :∘: (:-: ⟨ x ⟩)) ⟩
+                         ⟨ x ⟩ :∘: (:-: ⟨ x ⟩) ≡⟨ :inv-r: ⟨ x ⟩ ⟩
+                         :ε: ∎
     inv→inv (false , x) = {!!}
 
   fromFG : FG → HITGro A
