@@ -104,14 +104,14 @@ module FGByList {A : Type₀} (AIsSet : isSet A) where
   +-left-congruence : ∀ x x' y → rel x x' → rel (x ++ y) (x' ++ y)
   +-left-congruence x x' y (u , v , z , p , q) = u , (v ++ y) , z , p' , q'
     where
-      p' = {!!}
-      q' = {!!}
+      p' = (cong (λ z → z ++ y) p) ∙ (++-assoc u ([ z ] ++ [ inv z ] ++ v) y)
+      q' = (cong (λ z → z ++ y) q) ∙ (++-assoc u v y)
 
   +-right-congruence : ∀ x y y' → rel y y' → rel (x ++ y) (x ++ y')
-  +-right-congruence x y y' (u , v , z , p , q) = u , (v ++ y) , z , p' , q'
+  +-right-congruence x y y' (u , v , z , p , q) = (x ++ u) , v , z , p' , q'
     where
-      p' = {!!}
-      q' = {!!}
+      p' = (cong (λ z → x ++ z) p) ∙ (sym (++-assoc x u ([ z ] ++ [ inv z ] ++ v)))
+      q' = (cong (λ z → x ++ z) q) ∙ (sym (++-assoc x u v))
 
   _+_ : FG → FG → FG
   _+_ = rec2 FG-isSet (λ x y → ∥ x ++ y ∥) feql feqr
@@ -153,10 +153,12 @@ module FGByList {A : Type₀} (AIsSet : isSet A) where
   -FG squash/ x y p q i j = squash/ (-FG x) (-FG y) (cong (λ z → -FG z) p) (cong (λ z → -FG z) q) i j
 
   inv-invl-lem : ∀ x → rel ([ inv x ] ++  [ x ]) []
-  inv-invl-lem x  = ([] , [] , x , p , refl)
+  inv-invl-lem x  = ([] , [] , inv x , p , refl)
     where
-      p :  [ inv x ] ++ [ x ] ≡ [] ++ [ x ] ++ [ inv x ] ++ []
-      p = {!!}
+      p :  [ inv x ] ++ [ x ] ≡ [] ++ [ inv x ] ++ [ inv (inv x) ] ++ []
+      p = [] ++ [ inv x ] ++ [ x ] ≡⟨ cong (λ z → [] ++ [ inv x ] ++ [ z ]) (sym (inv-invol x)) ⟩
+          inv x ∷ [ inv (inv x) ] ≡⟨ sym (++-unit-r (inv x ∷ [ inv (inv x) ])) ⟩
+          inv x ∷ inv (inv x) ∷ [] ∎
 
   inv-invr-lem : ∀ x → rel ([ x ] ++  [ inv x ]) []
   inv-invr-lem x  = ([] , [] , x , refl , refl)
