@@ -264,17 +264,36 @@ module FGVsHITGro {A : Type₀} (AIsSet : isSet A) where
     fromFA ((false , x) ∷ xs) = (:-: ⟨ x ⟩) :∘: (fromFA xs)
     fromFA ((true , x) ∷ xs) = ⟨ x ⟩ :∘: (fromFA xs)
 
-    inv→inv : (x : X) → fromFA ([ x ] ++ [ inv x ]) ≡ :ε:
-    inv→inv (true , x) = (⟨ x ⟩) :∘: ((:-: ⟨ x ⟩) :∘: :ε:) ≡⟨ sym(:assoc: ⟨ x ⟩ (:-: ⟨ x ⟩) :ε:)  ⟩
-                         (⟨ x ⟩ :∘: (:-: ⟨ x ⟩)) :∘: :ε: ≡⟨ :unit-r: (⟨ x ⟩ :∘: (:-: ⟨ x ⟩)) ⟩
-                         ⟨ x ⟩ :∘: (:-: ⟨ x ⟩) ≡⟨ :inv-r: ⟨ x ⟩ ⟩
-                         :ε: ∎
-    inv→inv (false , x) = {!!}
+    fromFA-hom : (x y : FA) → fromFA (x ++ y) ≡ fromFA x :∘: fromFA y
+    fromFA-hom [] y = sym(:unit-l: (fromFA y))
+    fromFA-hom ((false , x) ∷ xs) y = cong (λ a → (:-: ⟨ x ⟩) :∘: a) (fromFA-hom xs y) ∙ sym(:assoc: (:-: ⟨ x ⟩) (fromFA xs) (fromFA y))
+    fromFA-hom ((true , x) ∷ xs) y = cong (λ a → (⟨ x ⟩) :∘: a) (fromFA-hom xs y) ∙ sym(:assoc: (⟨ x ⟩) (fromFA xs) (fromFA y))
 
-    finv-inv : (x : FA) → (fromFA x) :∘: (fromFA (finv x)) ≡ :ε:
-    finv-inv [] = :unit-l: :ε:
-    finv-inv ((true , x) ∷ xs) = :assoc: (⟨ x ⟩) (fromFA xs) (fromFA (finv ((true , x) ∷ xs))) ∙ {!!}
-    finv-inv ((false , x) ∷ xs) = {!!}
+    finv-inv-r : (x : FA) → (fromFA x) :∘: (fromFA (finv x)) ≡ :ε:
+    finv-inv-r [] = :unit-l: :ε:
+    finv-inv-r ((true , x) ∷ xs) = :assoc: (⟨ x ⟩) (fromFA xs) (fromFA (finv ((true , x) ∷ xs))) ∙
+                                 cong (λ a → ( (⟨ x ⟩) :∘: ((fromFA xs) :∘: a))) (fromFA-hom (finv xs) [ inv (true , x) ]) ∙
+                                 cong (λ a → ((⟨ x ⟩ :∘: (fromFA xs :∘: (fromFA (finv xs) :∘: a))))) (:unit-r: (:-: ⟨ snd (inv (true , x)) ⟩)) ∙
+                                 sym(:assoc: ⟨ x ⟩ (fromFA xs) ((fromFA (finv xs)) :∘: (:-: ⟨ snd (inv (true , x)) ⟩))) ∙
+                                 sym(:assoc: (⟨ x ⟩ :∘: (fromFA xs)) (fromFA (finv xs)) (:-: ⟨ snd (inv (true , x)) ⟩)) ∙
+                                 cong (λ a → a :∘: (:-: ⟨ snd (inv (true , x)) ⟩)) (:assoc: ⟨ x ⟩ (fromFA xs) (fromFA (finv xs))) ∙
+                                 cong (λ a → ((⟨ x ⟩ :∘: a) :∘: (:-: ⟨ snd (inv (true , x)) ⟩))) (finv-inv-r xs) ∙
+                                 cong (λ a → (a :∘: (:-: ⟨ snd (inv (true , x)) ⟩))) (:unit-r: ⟨ x ⟩) ∙
+                                 :inv-r: ⟨ x ⟩
+    finv-inv-r ((false , x) ∷ xs) = :assoc: (:-: ⟨ x ⟩) (fromFA xs) (fromFA (finv ((false , x) ∷ xs))) ∙
+                                  cong (λ a → ( (:-: ⟨ x ⟩) :∘: ((fromFA xs) :∘: a))) (fromFA-hom (finv xs) [ inv (false , x) ]) ∙
+                                  cong (λ a → (((:-: ⟨ x ⟩) :∘: (fromFA xs :∘: (fromFA (finv xs) :∘: a))))) (:unit-r: (⟨ snd (inv (false , x)) ⟩)) ∙
+                                  sym(:assoc: (:-: ⟨ x ⟩) (fromFA xs) ((fromFA (finv xs)) :∘: (⟨ snd (inv (false , x)) ⟩))) ∙
+                                  sym(:assoc: ((:-: ⟨ x ⟩) :∘: (fromFA xs)) (fromFA (finv xs)) (⟨ snd (inv (false , x)) ⟩)) ∙
+                                  cong (λ a → a :∘: (⟨ snd (inv (false , x)) ⟩)) (:assoc: (:-: ⟨ x ⟩) (fromFA xs) (fromFA (finv xs))) ∙
+                                  cong (λ a → (((:-: ⟨ x ⟩) :∘: a) :∘: (⟨ snd (inv (false , x)) ⟩))) (finv-inv-r xs) ∙
+                                  cong (λ a → (a :∘: (⟨ snd (inv (false , x)) ⟩))) (:unit-r: (:-: ⟨ x ⟩)) ∙
+                                  :inv-l: ⟨ x ⟩
+
+    finv-inv-l : (x : FA) → (fromFA (finv x)) :∘: (fromFA x) ≡ :ε:
+    finv-inv-l [] = :unit-r: :ε:
+    finv-inv-l ((true , x) ∷ xs) = {!!}
+    finv-inv-l ((false , x) ∷ xs) = {!!}
 
     eq-eq : (x y : FA) → (r : rel-ex x y) → ((fromFA x) ≡ (fromFA y))
     eq-eq x y (u , v , z , inl(p , q)) eq = {!!}
