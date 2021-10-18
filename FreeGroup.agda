@@ -276,6 +276,10 @@ module FGVsHITGro {A : Type₀} (AIsSet : isSet A) where
     finv-inv ((true , x) ∷ xs) = :assoc: (⟨ x ⟩) (fromFA xs) (fromFA (finv ((true , x) ∷ xs))) ∙ {!!}
     finv-inv ((false , x) ∷ xs) = {!!}
 
+    eq-eq : (x y : FA) → (r : rel-ex x y) → ((fromFA x) ≡ (fromFA y))
+    eq-eq x y (u , v , z , inl(p , q)) eq = {!!}
+    eq-eq x y (u , v , z , inr(p , q)) eq = {!!}
+
   fromFG : FG → HITGro A
   fromFG ∥ [] ∥ = fromFA []
   fromFG ∥ x ∷ xs ∥ = fromFA (x ∷ xs)
