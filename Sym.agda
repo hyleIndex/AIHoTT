@@ -9,18 +9,25 @@ open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.HLevels
 open import Cubical.HITs.SetTruncation
-open import Cubical.Data.Empty
+open import Cubical.Data.Empty as ⊥
 open import Cubical.Data.Unit
 open import Cubical.Data.Nat
 open import Cubical.Data.Nat.Order
 open import Cubical.Data.Fin
 open import Cubical.Data.Sigma
-
 open import Cubical.Relation.Nullary
 open import Cubical.Relation.Nullary.DecidableEq
 
+---
+--- General lemmas
+---
+
+pair≡ : {ℓ : Level} {A B : Type ℓ} {a a' : A} {b b' : B} → a ≡ a' → b ≡ b' → (a , b) ≡ (a' , b')
+pair≡ p q i = p i , q i
+
 -- postulate Fin<Dec : {n : ℕ} → (i j : Fin n) → Dec (i < j)
 
+-- the symmetric group
 S : (n : ℕ) → Type₀
 S n = Fin n ≃ Fin n
 
@@ -28,34 +35,66 @@ nf : ℕ → Type₀
 nf zero    = Unit
 nf (suc n) = Fin (suc n) × nf n
 
+nf-isSet : {n : ℕ} → isSet (nf n)
+nf-isSet {zero} = isProp→isSet isPropUnit
+nf-isSet {suc n} = isSet× isSetFin nf-isSet
+
+-- remove 0-th element
+rm : {n : ℕ} → (Fin (suc n) → Fin (suc n)) → Fin n → Fin n
+rm {n} f j = {!!}
+
 -- TODO: "remove" (f 0)-th element
-residual : {n : ℕ} → S (suc n) → S n
-residual f = {!!}
+rm-≃ : {n : ℕ} → S (suc n) → S n
+rm-≃ f = {!!}
 
 S→nf : (n : ℕ) → S n → nf n
 S→nf zero f = tt
-S→nf (suc n) f = fst f fzero , S→nf n (residual f)
+S→nf (suc n) f = fst f fzero , S→nf n (rm-≃ f)
 
--- send 0-th element to i
-send : {n : ℕ} → (i : Fin n) → S n
-send {n} i = isoToEquiv (iso (f n {!!}) {!!} {!!} {!!})
+-- send 0-th element to i and leave others untouched
+send : {n : ℕ} → Fin n → Fin n → Fin n
+send {n} (zero , i<n) (j , j<n) = j , j<n
+send {zero} (suc i , i<n) (j , j<n) = ⊥.elim {A = λ _ → Fin 0} (¬-<-zero j<n)
+send {suc n} (suc i , i<n) (zero , j<n) = zero , j<n
+send {suc n} (suc i , i<n) (suc j , j<n) = fsuc (send {n} (i , pred-≤-pred i<n) (j , (pred-≤-pred j<n)))
+
+-- TODO: not easy, or we could define the inverse
+send² : {n : ℕ} (i j : Fin n) → send i (send i j) ≡ j
+send² {n} (zero , i<n) (j , j<n) = refl
+send² {zero} (suc i , i<n) (j , j<n) = {!!} -- this is beacuse j < 0
+send² {suc n} (suc i , i<n) (zero , j<n) = refl
+send² {suc n} (suc i , i<n) (suc j , j<n) = {!cong fsuc ?!}
+
+send≃ : {n : ℕ} → (i : Fin n) → S n
+send≃ {n} i = isoToEquiv (iso (send i) (send i) (send² i) (send² i))
+
+Fin-id : (n : ℕ) → Fin n ≃ Fin n
+Fin-id n = isoToEquiv (iso f f (λ _ → refl) λ _ → refl)
   where
-  f : (n : ℕ) → (i : ℕ) → Fin n → Fin n
-  f n zero j = j
-  f zero (suc i) (zero , j<n) = {!!} -- impossible because of j<n
-  f (suc n) (suc i) (zero , j<n) = zero , j<n
-  f zero (suc i) (suc j , j<n) = {!!} -- impossible because of j<n
-  f (suc n) (suc i) (suc j , j<n) = fsuc (f n i (j , pred-≤-pred j<n))
+  f : Fin n → Fin n
+  f x = x
 
-nf→S : (n : ℕ) → nf n → S n
-nf→S n = {!!}
+Fin-lift-fun : {m n : ℕ} → (Fin m → Fin n) → Fin (suc m) → Fin (suc n)
+Fin-lift-fun f (zero , i<m) = zero , suc-≤-suc zero-≤
+Fin-lift-fun f (suc i , i<m) = fsuc (f (i , (pred-≤-pred i<m)))
 
--- S≃nf : (n : ℕ) → ∥ S n ∥₀ ≃ nf n
--- S≃nf n = isoToEquiv (iso {!!} {!!} {!!} {!!})
-  -- where
-  -- ρ : (n : ℕ) → ∥ S n ∥₀ → nf n
-  -- ρ zero f = tt
-  -- ρ (suc n) ∣ f ∣₀ = coe f fzero , {!!}
-  -- ρ (suc n) (squash₀ f f₁ p q i i₁) = {!!}
-  -- σ : nf n → ∥ S n ∥₀
-  -- σ = {!!}
+-- equivalence sending 0 to 0 and behaving as e otherwise
+cong-fsuc-≃ : {n : ℕ} → Fin n ≃ Fin n → Fin (suc n) ≃ Fin (suc n)
+cong-fsuc-≃ {n} e = isoToEquiv (iso f g f-g g-f)
+  where
+  f : Fin (suc n) → Fin (suc n)
+  f = Fin-lift-fun (fst e)
+  g : Fin (suc n) → Fin (suc n)
+  g = Fin-lift-fun (invEq e)
+  g-f : (i : Fin (suc n)) → g (f i) ≡ i
+  g-f (zero , i<sn) = ΣPathP (refl , m≤n-isProp _ _)
+  g-f (suc i , i<sn) = ΣPathP ((cong suc {!!}) , m≤n-isProp _ _) -- easy by induction
+  f-g : (i : Fin (suc n)) → f (g i) ≡ i
+  f-g = {!!} -- same as above
+
+nf→S : {n : ℕ} → nf n → S n
+nf→S {zero} tt = Fin-id 0
+nf→S {suc n} (i , f) = compEquiv (send≃ i) (cong-fsuc-≃ (nf→S f))
+
+S≃nf : (n : ℕ) → ∥ S n ∥₀ ≃ nf n
+S≃nf n = isoToEquiv (iso {!!} {!!} {!!} {!!})
