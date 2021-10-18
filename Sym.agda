@@ -31,6 +31,7 @@ pair≡ p q i = p i , q i
 S : (n : ℕ) → Type₀
 S n = Fin n ≃ Fin n
 
+-- normal form for symmetries
 nf : ℕ → Type₀
 nf zero    = Unit
 nf (suc n) = Fin (suc n) × nf n
@@ -47,21 +48,21 @@ rm {n} f j = {!!}
 rm-≃ : {n : ℕ} → S (suc n) → S n
 rm-≃ f = {!!}
 
-S→nf : (n : ℕ) → S n → nf n
-S→nf zero f = tt
-S→nf (suc n) f = fst f fzero , S→nf n (rm-≃ f)
+S→nf : {n : ℕ} → S n → nf n
+S→nf {zero} f = tt
+S→nf {suc n} f = fst f fzero , S→nf {n} (rm-≃ f)
 
 -- send 0-th element to i and leave others untouched
 send : {n : ℕ} → Fin n → Fin n → Fin n
 send {n} (zero , i<n) (j , j<n) = j , j<n
-send {zero} (suc i , i<n) (j , j<n) = ⊥.elim {A = λ _ → Fin 0} (¬-<-zero j<n)
+send {zero} (suc i , i<n) (j , j<n) = ⊥.rec (¬-<-zero j<n)
 send {suc n} (suc i , i<n) (zero , j<n) = zero , j<n
 send {suc n} (suc i , i<n) (suc j , j<n) = fsuc (send {n} (i , pred-≤-pred i<n) (j , (pred-≤-pred j<n)))
 
--- TODO: not easy, or we could define the inverse
+-- TODO: not easy, or we could define the inverse?
 send² : {n : ℕ} (i j : Fin n) → send i (send i j) ≡ j
 send² {n} (zero , i<n) (j , j<n) = refl
-send² {zero} (suc i , i<n) (j , j<n) = {!!} -- this is beacuse j < 0
+send² {zero} (suc i , i<n) (j , j<n) = ⊥.rec (¬-<-zero j<n)
 send² {suc n} (suc i , i<n) (zero , j<n) = refl
 send² {suc n} (suc i , i<n) (suc j , j<n) = {!cong fsuc ?!}
 
@@ -88,13 +89,25 @@ cong-fsuc-≃ {n} e = isoToEquiv (iso f g f-g g-f)
   g = Fin-lift-fun (invEq e)
   g-f : (i : Fin (suc n)) → g (f i) ≡ i
   g-f (zero , i<sn) = ΣPathP (refl , m≤n-isProp _ _)
-  g-f (suc i , i<sn) = ΣPathP ((cong suc {!!}) , m≤n-isProp _ _) -- easy by induction
+  g-f (suc i , i<sn) = ΣPathP ((cong suc {!!}) , m≤n-isProp _ _) -- should be easy by induction
   f-g : (i : Fin (suc n)) → f (g i) ≡ i
-  f-g = {!!} -- same as above
+  f-g = {!!} -- similar as above
 
 nf→S : {n : ℕ} → nf n → S n
 nf→S {zero} tt = Fin-id 0
 nf→S {suc n} (i , f) = compEquiv (send≃ i) (cong-fsuc-≃ (nf→S f))
 
-S≃nf : (n : ℕ) → ∥ S n ∥₀ ≃ nf n
-S≃nf n = isoToEquiv (iso {!!} {!!} {!!} {!!})
+S-nf-S : {n : ℕ} (f : S n) → nf→S (S→nf f) ≡ f
+S-nf-S e@(f , _) = equivEq (nf→S (S→nf e)) e (funExt (λ j → {!!}))
+
+nf-S-nf : {n : ℕ} (f : nf n) → S→nf (nf→S f) ≡ f
+nf-S-nf {zero} tt = refl
+nf-S-nf {suc n} (i , f) = {!!}
+
+S≃nf : (n : ℕ) → S n ≃ nf n
+S≃nf n = isoToEquiv (iso S→nf nf→S nf-S-nf S-nf-S)
+
+--- generators and relations for symmetries
+
+-- data gen : ℕ → Type₀ where
+  -- swap : (i k : ℕ) → 
