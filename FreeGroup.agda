@@ -92,11 +92,40 @@ module FGByList {A : Type₀} (AIsSet : isSet A) where
                            (finv t ++ finv xs) ++ [ inv x ] ≡⟨ ++-assoc (finv t) (finv xs) [ inv x ] ⟩
                            finv t ++ finv xs ++ [ inv x ]  ∎
 
+  finv-invol : (x : FA) → finv (finv x) ≡ x
+  finv-invol [] = refl
+  finv-invol (x ∷ xs) = ++-finv-hom (finv xs) [ inv x ] ∙ (cong (λ a →  a ∷ (finv (finv xs))) (inv-invol x)) ∙ cong (λ a → x ∷ a) (finv-invol xs)
+
   rel : FA → FA → Type₀
   rel s t = Σ[ u ∈ FA ] (Σ[ v ∈ FA ] (Σ[ x ∈ X ] ((s ≡ (u ++ [ x ] ++ [ inv x ] ++ v)) × (t ≡ u ++ v))))
 
+  rel-ex : FA → FA → Type₀
+  rel-ex s t = Σ[ u ∈ FA ] (Σ[ v ∈ FA ] (Σ[ x ∈ FA ] (((s ≡ (u ++ x ++ finv x ++ v)) × (t ≡ u ++ v)) ⊎ ((t ≡ (u ++ x ++ finv x ++ v)) × (s ≡ u ++ v)))))
+
+  +-left-congruence-ex : ∀ x x' y → rel-ex x x' → rel-ex (x ++ y) (x' ++ y)
+  +-left-congruence-ex x x' y (u , v , z , inl(p , q)) = u , v ++ y , z , inl(p' , q')
+    where
+      p' : x ++ y ≡ u ++ z ++ finv z ++ v ++ y
+      p' = cong (λ a → a ++ y) p ∙ ++-assoc u (z ++ finv z ++ v) y ∙ cong (λ a → u ++ a) (++-assoc z (finv z ++ v) y) ∙ cong (λ a → u ++ z ++ a) (++-assoc (finv z) v y)
+      q' : x' ++ y ≡ u ++ v ++ y
+      q' = cong (λ a → a ++ y) q ∙ (++-assoc u v y)
+  +-left-congruence-ex x x' y (u , v , z , inr(p , q)) = u , ((v ++ y) , (z , (inr (p' , q'))))
+    where
+      p' = cong (λ a → a ++ y) p ∙ ++-assoc u (z ++ finv z ++ v) y ∙ cong (λ a → u ++ a) (++-assoc z (finv z ++ v) y) ∙ cong (λ a → u ++ z ++ a) (++-assoc (finv z) v y)
+      q' = cong (λ a → a ++ y) q ∙ (++-assoc u v y)
+
+  +-right-congruence-ex : ∀ x y y' → rel-ex y y' → rel-ex (x ++ y) (x ++ y')
+  +-right-congruence-ex x y y' (u , v , z , inl (p , q)) = x ++ u , v , z , inl(p' , q')
+    where
+      p' = cong (λ a → x ++ a) p ∙ (sym (++-assoc x u (z ++ finv z ++ v)))
+      q' = cong (λ a → x ++ a) q ∙ (sym (++-assoc x u v))
+  +-right-congruence-ex x y y' (u , v , z , inr (p , q)) = x ++ u , v , z , inr (p' , q')
+    where
+      p' = cong (λ a → x ++ a) p ∙ (sym (++-assoc x u (z ++ finv z ++ v)))
+      q' = cong (λ a → x ++ a) q ∙ (sym (++-assoc x u v))
+
   FG : Type₀
-  FG = FA / rel
+  FG = FA / rel-ex
 
   FG-isSet : isSet FG
   FG-isSet = λ _ _ _ _ → squash/ _ _ _ _
@@ -116,10 +145,10 @@ module FGByList {A : Type₀} (AIsSet : isSet A) where
   _+_ : FG → FG → FG
   _+_ = rec2 FG-isSet (λ x y → ∥ x ++ y ∥) feql feqr
              where
-               feql : (a b c : FA) (r : rel a b) → ∥ a ++ c ∥ ≡ ∥ b ++ c ∥
-               feql a b c r = eq/ (a ++ c) (b ++ c) (+-left-congruence a b c r)
-               feqr : (a b c : FA) (r : rel b c) → ∥ a ++ b ∥ ≡ ∥ a ++ c ∥
-               feqr a b c r = eq/ (a ++ b) (a ++ c) (+-right-congruence a b c r)
+               feql : (a b c : FA) (r : rel-ex a b) → ∥ a ++ c ∥ ≡ ∥ b ++ c ∥
+               feql a b c r = eq/ (a ++ c) (b ++ c) (+-left-congruence-ex a b c r)
+               feqr : (a b c : FA) (r : rel-ex b c) → ∥ a ++ b ∥ ≡ ∥ a ++ c ∥
+               feqr a b c r = eq/ (a ++ b) (a ++ c) (+-right-congruence-ex a b c r)
 
   +-unit-r : ∀ x → x + ∥ [] ∥ ≡ x
   +-unit-r = SetQuotients.elimProp (λ x → FG-isSet (x + ∥ [] ∥) x)
@@ -133,23 +162,47 @@ module FGByList {A : Type₀} (AIsSet : isSet A) where
   FG+-assoc = SetQuotients.elimProp3 (λ _ _ _ → FG-isSet _ _)
               (λ { x y z i → ∥ ++-assoc x y z i  ∥ })
 
+--  lem : ∀ a b → rel a b → rel (finv a) (finv b)
+--  lem a b (u , v , y , p , q) = (finv v , finv u , y , p' , q')
+--        where
+--          p' = finv a ≡⟨ cong (finv) p ⟩
+--               finv (u ++ y ∷ inv y ∷ v) ≡⟨ ++-finv-hom u ([ y ] ++ [ inv y ] ++ v) ⟩
+--               finv ([ y ] ++ [ inv y ] ++ v) ++ finv u ≡⟨ cong (λ z → ((finv z) ++ (finv u))) (sym (++-assoc [ y ] [ inv y ] v)) ⟩
+--               finv (([ y ] ++ [ inv y ]) ++ v) ++ finv u ≡⟨ cong (λ z → z ++ finv u) (++-finv-hom ([ y ] ++ [ inv y ]) v) ⟩
+--               (finv v ++ [ inv (inv y) ] ++ [ inv y ]) ++ finv u ≡⟨ cong (λ z → (finv v ++ [ z ] ++ [ inv y ]) ++ finv u) (inv-invol y) ⟩
+--               (finv v ++ [ y ] ++ [ inv y ]) ++ finv u ≡⟨ ++-assoc (finv v) ([ y ] ++ [ inv y ]) (finv u) ⟩
+--               finv v ++ [ y ] ++ [ inv y ] ++ finv u     ∎
+--          q' = finv b ≡⟨ cong finv q ⟩
+--               finv (u ++ v) ≡⟨ ++-finv-hom u v ⟩
+--               finv v ++ finv u ∎
+
+  rel-ex-inv : ∀ a b → rel-ex a b → rel-ex (finv a) (finv b)
+  rel-ex-inv a b (u , v , x , inl(p , q)) = finv v , finv u , x , inl(p' , q')
+    where
+      p' = finv a ≡⟨ cong (finv) p ⟩
+           finv (u ++ x ++ finv x ++ v) ≡⟨ ++-finv-hom u (x ++ finv x ++ v) ⟩
+           finv (x ++ finv x ++ v) ++ finv u ≡⟨ cong (λ z → z ++ finv u) (++-finv-hom x (finv x ++ v))⟩
+           (finv (finv x ++ v) ++ finv x) ++ finv u ≡⟨ ++-assoc (finv (finv x ++ v)) (finv x) (finv u) ⟩
+           finv (finv x ++ v) ++ finv x ++ finv u ≡⟨ cong (λ a → a ++ (finv x) ++ (finv u)) (++-finv-hom (finv x) v) ⟩
+           (finv v ++ finv (finv x)) ++ finv x ++ finv u ≡⟨ ++-assoc (finv v) (finv (finv x)) (finv x ++ finv u) ⟩
+           finv v ++ finv (finv x) ++ finv x ++ finv u ≡⟨ cong (λ a → finv v ++ a ++ finv x ++ finv u) (finv-invol (x)) ⟩
+           finv v ++ x ++ finv x ++ finv u ∎
+      q' = finv b ≡⟨ cong (finv) q ⟩ finv (u ++ v) ≡⟨ ++-finv-hom u v ⟩ finv v ++ finv u ∎
+  rel-ex-inv a b (u , v , x , inr(p , q)) = finv v , finv u , x , inr(p' , q')
+    where
+      p' = finv b ≡⟨ cong (finv) p ⟩
+           finv (u ++ x ++ finv x ++ v) ≡⟨ ++-finv-hom u (x ++ finv x ++ v) ⟩
+           finv (x ++ finv x ++ v) ++ finv u ≡⟨ cong (λ z → z ++ finv u) (++-finv-hom x (finv x ++ v))⟩
+           (finv (finv x ++ v) ++ finv x) ++ finv u ≡⟨ ++-assoc (finv (finv x ++ v)) (finv x) (finv u) ⟩
+           finv (finv x ++ v) ++ finv x ++ finv u ≡⟨ cong (λ a → a ++ (finv x) ++ (finv u)) (++-finv-hom (finv x) v) ⟩
+           (finv v ++ finv (finv x)) ++ finv x ++ finv u ≡⟨ ++-assoc (finv v) (finv (finv x)) (finv x ++ finv u) ⟩
+           finv v ++ finv (finv x) ++ finv x ++ finv u ≡⟨ cong (λ a → finv v ++ a ++ finv x ++ finv u) (finv-invol (x)) ⟩
+           finv v ++ x ++ finv x ++ finv u ∎
+      q' = finv a ≡⟨ cong (finv) q ⟩ finv (u ++ v) ≡⟨ ++-finv-hom u v ⟩ finv v ++ finv u ∎
+
   -FG_ : FG → FG
   -FG ∥ a ∥ = ∥ finv a ∥
-  -FG eq/ a b r i = eq/ (finv a) (finv b) (lem a b r) i
-    where
-      lem : ∀ a b → rel a b → rel (finv a) (finv b)
-      lem a b (u , v , y , p , q) = (finv v , finv u , y , p' , q')
-        where
-          p' = finv a ≡⟨ cong (finv) p ⟩
-               finv (u ++ y ∷ inv y ∷ v) ≡⟨ ++-finv-hom u ([ y ] ++ [ inv y ] ++ v) ⟩
-               finv ([ y ] ++ [ inv y ] ++ v) ++ finv u ≡⟨ cong (λ z → ((finv z) ++ (finv u))) (sym (++-assoc [ y ] [ inv y ] v)) ⟩
-               finv (([ y ] ++ [ inv y ]) ++ v) ++ finv u ≡⟨ cong (λ z → z ++ finv u) (++-finv-hom ([ y ] ++ [ inv y ]) v) ⟩
-               (finv v ++ [ inv (inv y) ] ++ [ inv y ]) ++ finv u ≡⟨ cong (λ z → (finv v ++ [ z ] ++ [ inv y ]) ++ finv u) (inv-invol y) ⟩
-               (finv v ++ [ y ] ++ [ inv y ]) ++ finv u ≡⟨ ++-assoc (finv v) ([ y ] ++ [ inv y ]) (finv u) ⟩
-               finv v ++ [ y ] ++ [ inv y ] ++ finv u     ∎
-          q' = finv b ≡⟨ cong finv q ⟩
-               finv (u ++ v) ≡⟨ ++-finv-hom u v ⟩
-               finv v ++ finv u ∎
+  -FG eq/ a b r i = eq/ (finv a) (finv b) (rel-ex-inv a b r) i
   -FG squash/ x y p q i j = squash/ (-FG x) (-FG y) (cong (λ z → -FG z) p) (cong (λ z → -FG z) q) i j
 
   inv-invl-lem : ∀ x → rel ([ inv x ] ++  [ x ]) []
@@ -163,6 +216,33 @@ module FGByList {A : Type₀} (AIsSet : isSet A) where
   inv-invr-lem : ∀ x → rel ([ x ] ++  [ inv x ]) []
   inv-invr-lem x  = ([] , [] , x , refl , refl)
 
+  finv-invr : ∀ x → rel-ex (x ++ finv x) []
+  finv-invr [] = [] , [] , [] , inl(refl , refl)
+  finv-invr (x ∷ xs) = [] , [] , x ∷ xs , inl( p , refl )
+    where
+      p : x ∷ xs ++ finv xs ++ [ inv x ] ≡ x ∷ xs ++ (finv xs ++ [ inv x ]) ++ []
+      p = x ∷ xs ++ finv xs ++ [ inv x ] ≡⟨ sym(++-unit-r (x ∷ xs ++ finv xs ++ [ inv x ])) ⟩
+          (x ∷ xs ++ finv xs ++ [ inv x ]) ++ [] ≡⟨ ++-assoc (x ∷ xs ) (finv xs ++ [ inv x ]) [] ⟩
+          (x ∷ xs) ++ (finv xs ++ [ inv x ]) ++ [] ∎
+
+  finv-invl : ∀ x → rel-ex (finv x ++ x) []
+  finv-invl [] = [] , [] , [] , inl(refl , refl)
+  finv-invl (x ∷ xs) = [] , [] , finv (x ∷ xs) , inl( p , refl )
+    where
+      p : finv (x ∷ xs) ++ x ∷ xs ≡ finv (x ∷ xs) ++ finv (finv (x ∷ xs)) ++ []
+      p = finv (x ∷ xs) ++ x ∷ xs ≡⟨ cong (λ a → finv (x ∷ xs) ++ a ) (sym (finv-invol (x ∷ xs))) ⟩
+          finv (x ∷ xs) ++ finv (finv (x ∷ xs)) ≡⟨ sym(++-unit-r (finv (x ∷ xs) ++ finv (finv (x ∷ xs)))) ⟩
+          (finv (x ∷ xs) ++ finv (finv (x ∷ xs))) ++ [] ≡⟨ ++-assoc (finv (x ∷ xs)) (finv (finv (x ∷ xs))) [] ⟩
+          finv (x ∷ xs) ++ finv (finv (x ∷ xs)) ++ [] ∎
+
+  -FG-inv-r : ∀ x → x + (-FG x) ≡ ∥ [] ∥
+  -FG-inv-r = SetQuotients.elimProp (λ x → FG-isSet (x + (-FG x)) (∥ [] ∥))
+              (λ x → eq/ (x ++ finv x) ([]) (finv-invr x))
+
+  -FG-inv-l : ∀ x → (-FG x) + x ≡ ∥ [] ∥
+  -FG-inv-l = SetQuotients.elimProp (λ x → FG-isSet ((-FG x) + x) (∥ [] ∥))
+              (λ x → eq/ (finv x ++ x) ([]) (finv-invl x))
+
 module FGVsHITGro {A : Type₀} (AIsSet : isSet A) where
   open FGByList {A = A} AIsSet
 
@@ -173,8 +253,8 @@ module FGVsHITGro {A : Type₀} (AIsSet : isSet A) where
   toFG (:-: x) = -FG (toFG x)
   toFG (:unit-l: x i) = +-unit-l (toFG x) i
   toFG (:unit-r: x i) = +-unit-r (toFG x) i
-  toFG (:inv-l: x i) = {!!}
-  toFG (:inv-r: x i) = {!!}
+  toFG (:inv-l: x i) = -FG-inv-l (toFG x) i
+  toFG (:inv-r: x i) = -FG-inv-r (toFG x) i
   toFG (:assoc: x y z i) = FG+-assoc (toFG x) (toFG y) (toFG z) i
   toFG (trunc x y p q i j) = FG-isSet (toFG x) (toFG y) (λ k → toFG (p k)) (λ k → toFG (q k)) i j
 
@@ -191,12 +271,13 @@ module FGVsHITGro {A : Type₀} (AIsSet : isSet A) where
                          :ε: ∎
     inv→inv (false , x) = {!!}
 
+    finv-inv : (x : FA) → (fromFA x) :∘: (fromFA (finv x)) ≡ :ε:
+    finv-inv [] = :unit-l: :ε:
+    finv-inv ((true , x) ∷ xs) = :assoc: (⟨ x ⟩) (fromFA xs) (fromFA (finv ((true , x) ∷ xs))) ∙ {!!}
+    finv-inv ((false , x) ∷ xs) = {!!}
+
   fromFG : FG → HITGro A
-  fromFG ∥ [] ∥ = :ε:
-  fromFG ∥ x ∷ xs ∥ = (tmp x) :∘: (fromFG ∥ xs ∥)
-    where
-      tmp : X → HITGro A
-      tmp (true , x) = ⟨ x ⟩
-      tmp (false , x) = :-: ⟨ x ⟩
+  fromFG ∥ [] ∥ = fromFA []
+  fromFG ∥ x ∷ xs ∥ = fromFA (x ∷ xs)
   fromFG (eq/ a b r i) = {!!}
   fromFG (squash/ x y p q i j) = trunc (fromFG x) (fromFG y) (λ k → fromFG (p k)) (λ k → fromFG (q k)) i j
