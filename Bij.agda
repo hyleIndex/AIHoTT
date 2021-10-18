@@ -30,11 +30,11 @@ data Bij where
   zero : Bij
   suc : Bij → Bij
   swap : (n : Bij) → suc' (suc' n) ≡ suc' (suc' n)
-  -- * * k * * n
-  axiom : {k : ℕ} {n : Bij} → refl {x = ladd (suc zero) n} ≡ refl {x = suc' n}
+  inv  : (n : Bij) → swap n ∙ swap n ≡ refl
   xchg : {k : ℕ} {n : Bij} →
          cong (ladd (suc (suc k))) (swap n) ∙ swap (ladd k (suc' (suc' n))) ≡
          swap (ladd k (suc' (suc' n))) ∙ cong (ladd (suc (suc k))) (swap n)
+  yb   : {n : Bij} → swap (suc' n) ∙ cong suc' (swap n) ∙ swap (suc' n) ≡ cong suc' (swap n) ∙ swap (suc' n) ∙ cong suc' (swap n)
   gpd : isGroupoid Bij
 
 Bij-fromℕ zero = zero
@@ -49,13 +49,13 @@ suc𝔹 (id𝔹 {n = n} i j) = obj (suc n)
 suc𝔹 (comp𝔹 p q i j) = {!!}
 suc𝔹 (gpd𝔹 x y p q α β i j k) = {!!}
 
-fromBij : Bij → 𝔹
-fromBij zero = obj zero
-fromBij (suc x) = suc𝔹 (fromBij x)
-fromBij (swap x i) = suc𝔹 (suc𝔹 (fromBij x))
-fromBij (axiom {n = n} i j) = suc𝔹 (fromBij n)
-fromBij (xchg i j) = {!!}
-fromBij (gpd x y p q α β i j k) = {!!}
+-- fromBij : Bij → 𝔹
+-- fromBij zero = obj zero
+-- fromBij (suc x) = suc𝔹 (fromBij x)
+-- fromBij (swap x i) = suc𝔹 (suc𝔹 (fromBij x))
+-- fromBij (axiom {n = n} i j) = suc𝔹 (fromBij n)
+-- fromBij (xchg i j) = {!!}
+-- fromBij (gpd x y p q α β i j k) = {!!}
 
 thm : 𝔹 ≡ Bij
 thm = {!!}
