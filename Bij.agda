@@ -28,14 +28,14 @@ ladd (suc k) n = suc' (ladd k n)
 
 data Bij where
   zero : Bij
-  suc : Bij → Bij
+  suc  : Bij → Bij
   swap : (n : Bij) → suc' (suc' n) ≡ suc' (suc' n)
   inv  : (n : Bij) → swap n ∙ swap n ≡ refl
   xchg : {k : ℕ} {n : Bij} →
          cong (ladd (suc (suc k))) (swap n) ∙ swap (ladd k (suc' (suc' n))) ≡
          swap (ladd k (suc' (suc' n))) ∙ cong (ladd (suc (suc k))) (swap n)
   yb   : {n : Bij} → swap (suc' n) ∙ cong suc' (swap n) ∙ swap (suc' n) ≡ cong suc' (swap n) ∙ swap (suc' n) ∙ cong suc' (swap n)
-  gpd : isGroupoid Bij
+  gpd  : isGroupoid Bij
 
 Bij-fromℕ zero = zero
 Bij-fromℕ (suc n) = suc (Bij-fromℕ n)
