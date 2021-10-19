@@ -14,7 +14,7 @@ open import Cubical.HITs.SetTruncation
 open import Cubical.Data.Empty as ⊥
 open import Cubical.Data.Unit
 open import Cubical.Data.Nat
-open import Cubical.Data.Nat.Order
+open import Cubical.Data.Nat.Order as Order
 open import Cubical.Data.Fin
 open import Cubical.Data.Sigma
 open import Cubical.Relation.Nullary
@@ -45,18 +45,22 @@ pair≡ p q i = p i , q i
 
 -- TODO: by trichotomy
 ¬<-≥ : {m n : ℕ} → ¬ (m < n) → n ≤ m
-¬<-≥ = {!!}
+¬<-≥ {m = m} {n = n} p = {!!}
 
--- TODO: by trichotomy
 ≤-≢-< : {m n : ℕ} → m ≤ n → m ≢ n → m < n
-≤-≢-< = {!!}
+≤-≢-< {m = m} {n = n} (zero , p) q = ⊥.elim(q p)
+≤-≢-< {m = m} {n = n} (suc x , p) q = x , +-suc x m ∙ p
 
 <-≢ : {m n : ℕ} → m < n → m ≢ n
-<-≢ = {!!}
+<-≢ {m = m} {n = n} p q = ¬m<m (subst (_< n) q p)
 
--- TODO
 <-<-suc : {m n o : ℕ} → m < n → n < suc o → m < o
-<-<-suc = {!!}
+<-<-suc {m = m} {n = n} {o = o} (x , p) (y , q) = (x + y) , p'
+  where
+    p' = x + y + suc m ≡⟨ cong (λ a → a + suc m) (+-comm x y) ⟩
+         y + x + suc m ≡⟨ sym(+-assoc y x (suc m)) ⟩
+         y + (x + suc m) ≡⟨ cong (λ a → y + a) p ⟩
+         y + n ≡⟨ injSuc ((sym (+-suc y n) ∙ q)) ⟩ o ∎
 
 inspect : {ℓ : Level} {A : Type ℓ} (x : A) → singl x
 inspect x = x , refl
@@ -194,7 +198,7 @@ send≃ {n} i = isoToEquiv (iso (send i) (send i) (send² i) (send² i))
 -- -- S≃nf n = isoToEquiv (iso S→nf nf→S nf-S-nf S-nf-S)
 
 S0≃Unit : S 0 ≃ Unit
-S0≃Unit = isoToEquiv (iso (λ _ → tt) (λ _ → idEquiv (Fin 0)) (λ { tt → refl }) (λ e → equivEq _ _ (funExt λ { (i , i<0) → ⊥.rec (¬-<-zero i<0) })))
+S0≃Unit = isoToEquiv (iso (λ _ → tt) (λ _ → idEquiv (Fin 0)) (λ { tt → refl }) (λ e → equivEq (funExt λ { (i , i<0) → ⊥.rec (¬-<-zero i<0) })))
 
 Ss : (n : ℕ) → S (suc n) ≃ Fin (suc n) × S n
 Ss n = isoToEquiv (iso f g {!!} {!!})
@@ -226,4 +230,4 @@ data Sym : ℕ → Type₀ where
   set  : {n : ℕ} → isSet (Sym n)
 
 thm : {n : ℕ} → Sym n ≃ nf n
-thm = ?
+thm = {!!}
