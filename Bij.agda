@@ -43,18 +43,22 @@ Bij-fromℕ : ℕ → Bij
 Bij-fromℕ zero = zero
 Bij-fromℕ (suc n) = suc (Bij-fromℕ n)
 
+-- SM: I am really not sure about how we should proceed to prove this one which
+-- should be needed to show that Bij ≃ Σ ℕ (λ n → Sym n)
 end : (m n : ℕ) → Bij-fromℕ m ≡ Bij-fromℕ n → m ≡ n
-end zero zero p = refl
-end zero (suc n) p = {!!}
-end (suc m) zero p = {!!}
-end (suc m) (suc n) p = cong suc (end m n {!injSuc p!})
+end m n = {!!}
+-- -- SM: I would like to do something like the following but this is currently not
+-- -- supported by Agda
+-- end m n p i with p i
+-- ... | x = {!!}
 
-suc𝔹 : 𝔹 → 𝔹
-suc𝔹 (obj n) = obj (suc n)
-suc𝔹 (path {m = m}{n = n} p i) = {!(cong (λ x → obj (suc x)) (Fin-inj m n p))!}
-suc𝔹 (id𝔹 {n = n} i j) = obj (suc n)
-suc𝔹 (comp𝔹 p q i j) = {!!}
-suc𝔹 (gpd𝔹 x y p q α β i j k) = {!!}
+
+-- suc𝔹 : 𝔹 → 𝔹
+-- suc𝔹 (obj n) = obj (suc n)
+-- suc𝔹 (path {m = m}{n = n} p i) = {!(cong (λ x → obj (suc x)) (Fin-inj m n p))!}
+-- suc𝔹 (id𝔹 {n = n} i j) = obj (suc n)
+-- suc𝔹 (comp𝔹 p q i j) = {!!}
+-- suc𝔹 (gpd𝔹 x y p q α β i j k) = {!!}
 
 -- fromBij : Bij → 𝔹
 -- fromBij zero = obj zero
@@ -64,5 +68,5 @@ suc𝔹 (gpd𝔹 x y p q α β i j k) = {!!}
 -- fromBij (xchg i j) = {!!}
 -- fromBij (gpd x y p q α β i j k) = {!!}
 
-thm : 𝔹 ≡ Bij
-thm = {!!}
+-- thm : 𝔹 ≡ Bij
+-- thm = {!!}
