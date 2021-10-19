@@ -25,6 +25,16 @@ open import Cubical.Relation.Nullary.DecidableEq
 pair≡ : {ℓ : Level} {A B : Type ℓ} {a a' : A} {b b' : B} → a ≡ a' → b ≡ b' → (a , b) ≡ (a' , b')
 pair≡ p q i = p i , q i
 
+≤-dec : (m n : ℕ) → Dec (m ≤ n)
+≤-dec zero n = yes (n , +-zero n)
+≤-dec (suc m) zero = no ¬-<-zero
+≤-dec (suc m) (suc n) with ≤-dec m n
+... | yes p = yes (suc-≤-suc p)
+... | no ¬p = no λ p → ¬p (pred-≤-pred p)
+
+<-dec : (m n : ℕ) → Dec (m < n)
+<-dec m n = ≤-dec (suc m) n
+
 -- postulate Fin<Dec : {n : ℕ} → (i j : Fin n) → Dec (i < j)
 
 -- the symmetric group
@@ -41,12 +51,22 @@ nf-isSet {zero} = isProp→isSet isPropUnit
 nf-isSet {suc n} = isSet× isSetFin nf-isSet
 
 -- remove 0-th element
+-- rm : {n : ℕ} → (Fin (suc n) → Fin (suc n)) → Fin n → Fin n
+-- rm {n} f j' with f fzero | f (fsuc j')
+-- rm {n} f j' | zero , i<sn | zero , j<sn = {!!}
+-- rm {n} f j' | zero , i<sn | suc j , j<sn = {!!}
+-- rm {n} f j' | suc i , i<sn | j , j<sn = {!!}
+
 rm : {n : ℕ} → (Fin (suc n) → Fin (suc n)) → Fin n → Fin n
-rm {n} f j = {!!}
+-- rm f i with = {!!}
 
 -- TODO: "remove" (f 0)-th element
 rm-≃ : {n : ℕ} → S (suc n) → S n
-rm-≃ f = {!!}
+rm-≃ = {!!}
+-- rm-≃ {n} e@(f , _) = {!!}
+  -- where
+  -- g : Fin n → Fin n
+  -- g j' with = {!!}
 
 S→nf : {n : ℕ} → S n → nf n
 S→nf {zero} f = tt
