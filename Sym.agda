@@ -70,7 +70,7 @@ nf-isSet {suc n} = isSet× isSetFin nf-isSet
 rm : {n : ℕ} (f : Fin (suc n) → Fin (suc n)) → isEmbedding f → Fin n → Fin n
 rm {n} f e j' with inspect (f fzero) | inspect (f (fsuc j'))
 ... | (zero , i<sn) , f0≡i | (zero , j<sn) , fsj'≡j = ⊥.rec (znots (cong fst (invEq (_ , e fzero (fsuc j')) (f0≡i ∙ sym (Fin≡ (cong fst fsj'≡j)))))) -- both zero and s j' are sent to 0: impossible because f is an embedding
-... | (zero , i<sn) , f0≡i | (suc j , j<sn) , fsj'≡j = {!!}
+... | (zero , i<sn) , f0≡i | (suc j , j<sn) , fsj'≡j = j , (fst j<sn , +-suc _ _ ∙ injSuc (cong suc (sym (+-suc _ _)) ∙ sym (+-suc _ _) ∙ snd j<sn))
 ... | (suc i , i<sn) , f0≡i | (j , j<sn) , fsj'≡j = {!!}
 -- rm {n} f j' | zero , i<sn | zero , j<sn = {!!}
 -- rm {n} f j' | zero , i<sn | suc j , j<sn = {!!}
