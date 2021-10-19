@@ -162,6 +162,9 @@ module FGByList {A : Type₀} (AIsSet : isSet A) where
   FG+-assoc = SetQuotients.elimProp3 (λ _ _ _ → FG-isSet _ _)
               (λ { x y z i → ∥ ++-assoc x y z i  ∥ })
 
+  +-hom : (x y : FA) → ∥ x ∥ + ∥ y ∥ ≡ ∥ x ++ y ∥
+  +-hom x y = refl
+
 --  lem : ∀ a b → rel a b → rel (finv a) (finv b)
 --  lem a b (u , v , y , p , q) = (finv v , finv u , y , p' , q')
 --        where
@@ -330,11 +333,72 @@ module FGVsHITGro {A : Type₀} (AIsSet : isSet A) where
                                          (fromFA u) :∘: fromFA (z ++ finv z ++ v) ≡⟨ sym(fromFA-hom u (z ++ finv z ++ v)) ⟩
                                          fromFA (u ++ z ++ finv z ++ v) ≡⟨ cong (λ a → (fromFA a)) (sym p) ⟩ fromFA y ∎
 
+    double-neg : (x : HITGro A) → (:-: (:-: x)) ≡ x
+    double-neg x = sym(:unit-r: (:-: (:-: x))) ∙ cong (λ y → (:-: (:-: x)) :∘: y) (sym (:inv-l: x)) ∙
+                   sym (:assoc: (:-: (:-: x)) (:-: x) x) ∙ cong (λ y → y :∘: x) (:inv-l: (:-: x)) ∙ :unit-l: x
+
+    fromFA-inv-lem : (x : X) → fromFA ([ inv x ]) ≡ :-: (fromFA [ x ])
+    fromFA-inv-lem (false , x) = :unit-r: ⟨ x ⟩ ∙ sym (cong (:-:_) (:unit-r: (:-: ⟨ x ⟩)) ∙ double-neg ⟨ x ⟩)
+    fromFA-inv-lem (true , x) = :unit-r: (:-: ⟨ snd (inv (true , x)) ⟩) ∙ sym (cong (:-:_ ) (:unit-r: ⟨ x ⟩))
+
+    fromFA-inv : (x : FA) → fromFA (finv x) ≡ :-: (fromFA x)
+    fromFA-inv [] = sym (:inv-r: :ε:) ∙ (:unit-l: (:-: :ε:))
+    fromFA-inv (x ∷ xs) = fromFA (finv (x ∷ xs)) ≡⟨ cong (λ a → (fromFA a)) (++-finv-hom [ x ] xs) ⟩
+                          fromFA (finv xs ++ finv [ x ]) ≡⟨ fromFA-hom (finv xs) (finv [ x ]) ⟩
+                          fromFA (finv xs) :∘: fromFA (finv [ x ]) ≡⟨ cong (_:∘: fromFA [ inv x ]) (fromFA-inv xs) ⟩
+                          (:-: fromFA xs) :∘: fromFA [ inv x ] ≡⟨ cong ((:-: fromFA xs) :∘:_) (fromFA-inv-lem x) ⟩
+                          (:-: fromFA xs) :∘: (:-: fromFA [ x ]) ≡⟨ sym(:unit-l: ((:-: fromFA xs) :∘: (:-: fromFA [ x ]))) ⟩
+                          :ε: :∘: ((:-: fromFA xs) :∘: (:-: fromFA [ x ])) ≡⟨ cong (λ a → a :∘: ((:-: fromFA xs) :∘: (:-: fromFA [ x ]))) (sym(:inv-r:  (:-: fromFA (x ∷ xs)))) ⟩
+                          ((:-: fromFA (x ∷ xs)) :∘: (:-: (:-: fromFA (x ∷ xs)))) :∘: ((:-: fromFA xs) :∘: (:-: fromFA [ x ])) ≡⟨ cong (λ a → ((:-: fromFA (x ∷ xs)) :∘: a) :∘: ((:-: fromFA xs) :∘: (:-: fromFA [ x ]))) (double-neg (fromFA (x ∷ xs))) ⟩
+                          ((:-: fromFA (x ∷ xs)) :∘: fromFA (x ∷ xs)) :∘: ((:-: fromFA xs) :∘: (:-: fromFA [ x ])) ≡⟨ sym(:assoc: ((:-: fromFA (x ∷ xs)) :∘: fromFA (x ∷ xs)) (:-: fromFA xs) (:-: fromFA [ x ])) ⟩
+                          (((:-: fromFA (x ∷ xs)) :∘: fromFA (x ∷ xs)) :∘: (:-: fromFA xs)) :∘: (:-: fromFA [ x ]) ≡⟨ cong (λ a → a :∘: (:-: (fromFA [ x ]))) (:assoc: (:-: fromFA (x ∷ xs)) (fromFA (x ∷ xs)) (:-: fromFA xs)) ⟩
+                          ((:-: fromFA (x ∷ xs)) :∘: (fromFA (x ∷ xs) :∘: (:-: fromFA xs))) :∘: (:-: fromFA [ x ]) ≡⟨ cong (λ a → ((:-: fromFA (x ∷ xs)) :∘: (a :∘: (:-: fromFA xs))) :∘: (:-: fromFA [ x ])) (fromFA-hom [ x ] xs) ⟩
+                          ((:-: fromFA (x ∷ xs)) :∘: ((fromFA [ x ] :∘: fromFA xs) :∘: (:-: fromFA xs))) :∘: (:-: fromFA [ x ]) ≡⟨ cong (λ a → ((:-: fromFA (x ∷ xs)) :∘: a) :∘: (:-: fromFA [ x ])) (:assoc: (fromFA [ x ]) (fromFA xs) (:-: fromFA xs)) ⟩
+                          ((:-: fromFA (x ∷ xs)) :∘: (fromFA [ x ] :∘: (fromFA xs :∘: (:-: fromFA xs)))) :∘: (:-: fromFA [ x ]) ≡⟨ cong (λ a → ((:-: fromFA (x ∷ xs)) :∘: (fromFA [ x ] :∘: a)) :∘: (:-: fromFA [ x ])) (:inv-r: (fromFA xs)) ⟩
+                          ((:-: fromFA (x ∷ xs)) :∘: (fromFA [ x ] :∘: :ε:)) :∘: (:-: fromFA [ x ]) ≡⟨ cong (λ a → ((:-: fromFA (x ∷ xs)) :∘: a) :∘: (:-: fromFA [ x ])) (:unit-r: (fromFA [ x ])) ⟩
+                          ((:-: fromFA (x ∷ xs)) :∘: fromFA [ x ]) :∘: (:-: fromFA [ x ]) ≡⟨ :assoc: (:-: fromFA (x ∷ xs)) (fromFA [ x ]) (:-: fromFA [ x ]) ⟩
+                          (:-: fromFA (x ∷ xs)) :∘: (fromFA [ x ] :∘: (:-: fromFA [ x ])) ≡⟨ cong (λ a → (:-: fromFA (x ∷ xs)) :∘: a) (:inv-r: (fromFA [ x ])) ⟩
+                          (:-: fromFA (x ∷ xs)) :∘: :ε: ≡⟨ :unit-r: (:-: fromFA (x ∷ xs)) ⟩
+                          :-: fromFA (x ∷ xs) ∎
+
   fromFG : FG → HITGro A
-  fromFG ∥ [] ∥ = fromFA []
-  fromFG ∥ x ∷ xs ∥ = fromFA (x ∷ xs)
-  fromFG (eq/ a b r i) = tmp a b r i
-    where
-      tmp : ∀ a b → rel-ex a b → fromFG ∥ a ∥ ≡ fromFG ∥ b ∥
-      tmp a b r = {!!}
+  fromFG ∥ x ∥ = fromFA x
+  fromFG (eq/ a b r i) = eq-eq a b r i
   fromFG (squash/ x y p q i j) = trunc (fromFG x) (fromFG y) (λ k → fromFG (p k)) (λ k → fromFG (q k)) i j
+
+  fromFG-hom : (x y : FG) → fromFG x :∘: fromFG y ≡ fromFG (x + y)
+  fromFG-hom = elimProp2 (λ x y → (trunc (fromFG x :∘: fromFG y) (fromFG (x + y)))) λ a b → (sym(fromFA-hom a b))
+
+  from-toFG : (x : HITGro A) → fromFG (toFG x) ≡ x
+  from-toFG = elimFGProp (λ m → fromFG (toFG m) ≡ m) (λ x → (trunc (fromFG (toFG x)) x))
+                         (λ x → :unit-r: ⟨ x ⟩) refl
+                         (λ x → λ y → λ p → λ q → sym(fromFG-hom (toFG x) (toFG y)) ∙ cong₂ _:∘:_ p q)
+                         λ x → λ p → fromFG-inv (toFG x) ∙ cong (:-:_) p
+              where
+                fromFG-inv : (x : FG) → fromFG (-FG x) ≡ :-: (fromFG x)
+                fromFG-inv = elimProp (λ x → (trunc (fromFG (-FG x)) (:-: fromFG x))) λ x → fromFA-inv x
+
+  to-fromFA-lem : (x : X) → toFG (fromFA [ x ]) ≡ ∥ [ x ] ∥
+  to-fromFA-lem (false , x) = refl
+  to-fromFA-lem (true , x) = refl
+
+  to-fromFA : (x : FA) → toFG (fromFA x) ≡ ∥ x ∥
+  to-fromFA [] = refl
+  to-fromFA (x ∷ xs) = toFG (fromFA (x ∷ xs)) ≡⟨ cong (λ a → toFG a) (fromFA-hom ([ x ]) xs) ⟩
+                       toFG (fromFA [ x ]) + toFG (fromFA xs) ≡⟨ cong₂ _+_ (to-fromFA-lem x) (to-fromFA xs) ⟩
+                       ∥ [ x ] ∥ + ∥ xs ∥ ≡⟨ refl ⟩ ∥ x ∷ xs ∥ ∎
+
+  to-fromFG : (x : FG) → toFG (fromFG x) ≡ x
+  to-fromFG = elimProp (λ x → (FG-isSet (toFG (fromFG x)) x)) λ a → (lem a)
+              where
+                lem : (x : FA) → toFG (fromFG ∥ x ∥) ≡ ∥ x ∥
+                lem [] = refl
+                lem (x ∷ xs) = toFG (fromFG ∥ x ∷ xs ∥) ≡⟨ cong (λ a → toFG a) (sym (fromFG-hom ∥ [ x ] ∥ ∥ xs ∥)) ⟩
+                               toFG (fromFA [ x ]) + toFG (fromFA xs) ≡⟨ cong₂ _+_ (to-fromFA [ x ]) (to-fromFA xs) ⟩
+                               ∥ [ x ] ∥ + ∥ xs ∥ ≡⟨ refl ⟩ ∥ x ∷ xs ∥ ∎
+
+  FG≃HITGro : FG ≃ HITGro A
+  FG≃HITGro = isoToEquiv (iso fromFG toFG from-toFG to-fromFG)
+
+  FG≡HITGro : FG ≡ (HITGro A)
+  FG≡HITGro = ua FG≃HITGro
