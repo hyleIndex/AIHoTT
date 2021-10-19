@@ -8,6 +8,7 @@ open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.HLevels
+open import Cubical.Functions.Embedding
 open import Cubical.HITs.SetTruncation
 open import Cubical.Data.Empty as ⊥
 open import Cubical.Data.Unit
@@ -35,6 +36,15 @@ pair≡ p q i = p i , q i
 <-dec : (m n : ℕ) → Dec (m < n)
 <-dec m n = ≤-dec (suc m) n
 
+inspect : {ℓ : Level} {A : Type ℓ} (x : A) → singl x
+inspect x = x , refl
+
+Fin≡ : {k : ℕ} {m n : Fin k} → fst m ≡ fst n → m ≡ n
+Fin≡ {k} {m} {n} p i = (p i) , q i
+  where
+  q : PathP (λ i → p i < k) (snd m) (snd n)
+  q = toPathP (m≤n-isProp _ _)
+
 -- postulate Fin<Dec : {n : ℕ} → (i j : Fin n) → Dec (i < j)
 
 -- the symmetric group
@@ -51,22 +61,25 @@ nf-isSet {zero} = isProp→isSet isPropUnit
 nf-isSet {suc n} = isSet× isSetFin nf-isSet
 
 -- remove 0-th element
--- rm : {n : ℕ} → (Fin (suc n) → Fin (suc n)) → Fin n → Fin n
+-- rm : {n : ℕ} → Fin (suc n) → Fin (suc n) → Fin n → Fin n
 -- rm {n} f j' with f fzero | f (fsuc j')
 -- rm {n} f j' | zero , i<sn | zero , j<sn = {!!}
 -- rm {n} f j' | zero , i<sn | suc j , j<sn = {!!}
 -- rm {n} f j' | suc i , i<sn | j , j<sn = {!!}
 
-rm : {n : ℕ} → (Fin (suc n) → Fin (suc n)) → Fin n → Fin n
--- rm f i with = {!!}
+rm : {n : ℕ} (f : Fin (suc n) → Fin (suc n)) → isEmbedding f → Fin n → Fin n
+rm {n} f e j' with inspect (f fzero) | inspect (f (fsuc j'))
+... | (zero , i<sn) , f0≡i | (zero , j<sn) , fsj'≡j = ⊥.rec (znots (cong fst (invEq (_ , e fzero (fsuc j')) (f0≡i ∙ sym (Fin≡ (cong fst fsj'≡j)))))) -- both zero and s j' are sent to 0: impossible because f is an embedding
+... | (zero , i<sn) , f0≡i | (suc j , j<sn) , fsj'≡j = {!!}
+... | (suc i , i<sn) , f0≡i | (j , j<sn) , fsj'≡j = {!!}
+-- rm {n} f j' | zero , i<sn | zero , j<sn = {!!}
+-- rm {n} f j' | zero , i<sn | suc j , j<sn = {!!}
+-- rm {n} f j' | suc i , i<sn | j , j<sn = {!!}
+
 
 -- TODO: "remove" (f 0)-th element
 rm-≃ : {n : ℕ} → S (suc n) → S n
 rm-≃ = {!!}
--- rm-≃ {n} e@(f , _) = {!!}
-  -- where
-  -- g : Fin n → Fin n
-  -- g j' with = {!!}
 
 S→nf : {n : ℕ} → S n → nf n
 S→nf {zero} f = tt
