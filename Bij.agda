@@ -8,7 +8,8 @@ open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.HLevels
-open import Data.Nat
+open import Cubical.Data.Nat
+open import Cubical.Data.Nat.Properties
 open import Cubical.Data.Fin
 
 data 𝔹 : Type₁ where
@@ -19,7 +20,6 @@ data 𝔹 : Type₁ where
   gpd𝔹 : isGroupoid 𝔹
 
 data Bij : Type₁
-Bij-fromℕ : ℕ → Bij
 ladd : ℕ → Bij → Bij
 suc' : Bij → Bij
 
@@ -37,17 +37,28 @@ data Bij where
   yb   : {n : Bij} → swap (suc' n) ∙ cong suc' (swap n) ∙ swap (suc' n) ≡ cong suc' (swap n) ∙ swap (suc' n) ∙ cong suc' (swap n)
   gpd  : isGroupoid Bij
 
+suc' = suc
+
+Bij-fromℕ : ℕ → Bij
 Bij-fromℕ zero = zero
 Bij-fromℕ (suc n) = suc (Bij-fromℕ n)
 
-suc' = suc
+-- SM: I am really not sure about how we should proceed to prove this one which
+-- should be needed to show that Bij ≃ Σ ℕ (λ n → Sym n)
+end : (m n : ℕ) → Bij-fromℕ m ≡ Bij-fromℕ n → m ≡ n
+end m n = {!!}
+-- -- SM: I would like to do something like the following but this is currently not
+-- -- supported by Agda
+-- end m n p i with p i
+-- ... | x = {!!}
 
-suc𝔹 : 𝔹 → 𝔹
-suc𝔹 (obj n) = obj (suc n)
-suc𝔹 (path {m = m}{n = n} p i) = {!(cong (λ x → obj (suc x)) (Fin-inj m n p))!}
-suc𝔹 (id𝔹 {n = n} i j) = obj (suc n)
-suc𝔹 (comp𝔹 p q i j) = {!!}
-suc𝔹 (gpd𝔹 x y p q α β i j k) = {!!}
+
+-- suc𝔹 : 𝔹 → 𝔹
+-- suc𝔹 (obj n) = obj (suc n)
+-- suc𝔹 (path {m = m}{n = n} p i) = {!(cong (λ x → obj (suc x)) (Fin-inj m n p))!}
+-- suc𝔹 (id𝔹 {n = n} i j) = obj (suc n)
+-- suc𝔹 (comp𝔹 p q i j) = {!!}
+-- suc𝔹 (gpd𝔹 x y p q α β i j k) = {!!}
 
 -- fromBij : Bij → 𝔹
 -- fromBij zero = obj zero
@@ -57,5 +68,5 @@ suc𝔹 (gpd𝔹 x y p q α β i j k) = {!!}
 -- fromBij (xchg i j) = {!!}
 -- fromBij (gpd x y p q α β i j k) = {!!}
 
-thm : 𝔹 ≡ Bij
-thm = {!!}
+-- thm : 𝔹 ≡ Bij
+-- thm = {!!}
