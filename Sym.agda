@@ -92,11 +92,6 @@ nf-isSet {suc n} = isSet× isSetFin nf-isSet
 Fin-rm : {n : ℕ} (i : Fin (suc n)) → Σ (Fin (suc n)) (λ j → j ≢ i) ≃ Fin n
 Fin-rm {n} (i , i<sn) = isoToEquiv (iso f g {!!} {!!})
   where
-  -- f : (i : Fin (suc n)) → Σ (Fin (suc n)) (λ j → j ≢ i) → Fin n
-  -- f (zero , i<sn) ((zero , j<sn) , j≢i) = ⊥.rec (j≢i (Fin≡ refl))
-  -- f (zero , i<sn) ((suc j , j<sn) , j≢i) = j , pred-≤-pred j<sn
-  -- f (suc i , i<sn) ((zero , j<sn) , j≢i) = zero , {!!} -- TODO
-  -- f (suc i , i<sn) ((suc j , j<sn) , j≢i) = {!!} , {!!}
   f : Σ (Fin (suc n)) (λ j → j ≢ (i , i<sn)) → Fin n
   f ((j , j<sn) , j≢i) with <-dec i j
   f ((zero , j<sn) , j≢i) | yes i<j = ⊥.rec (¬-<-zero i<j)
@@ -209,8 +204,17 @@ S≃nf (suc n) =
   Fin (suc n) × S n ≃⟨ cong≃ (λ A → Fin (suc n) × A) (S≃nf n) ⟩
   Fin (suc n) × nf n ■
 
+---
+--- Comparison with Bij
+---
 
---- generators and relations for symmetries
-
--- data gen : ℕ → Type₀ where
-  -- swap : (i k : ℕ) → 
+-- presentaiton of Bij n
+data Sym : ℕ → Type₀ where
+  -- swap : {n : ℕ} → Fin n → Sym (suc (suc n)) → Sym (suc (suc n))
+  swap : {l : ℕ} → (r : ℕ) → Sym (l + 2 + r) → Sym (l + 2 + r)
+  -- inv  : (n : Bij) → swap n ∙ swap n ≡ refl
+  -- xchg : {k : ℕ} {n : Bij} →
+         -- cong (ladd (suc (suc k))) (swap n) ∙ swap (ladd k (suc' (suc' n))) ≡
+         -- swap (ladd k (suc' (suc' n))) ∙ cong (ladd (suc (suc k))) (swap n)
+  -- yb   : {n : Bij} → swap (suc' n) ∙ cong suc' (swap n) ∙ swap (suc' n) ≡ cong suc' (swap n) ∙ swap (suc' n) ∙ cong suc' (swap n)
+  -- gpd  : isGroupoid Bij

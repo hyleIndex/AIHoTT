@@ -19,7 +19,6 @@ data 𝔹 : Type₁ where
   gpd𝔹 : isGroupoid 𝔹
 
 data Bij : Type₁
-Bij-fromℕ : ℕ → Bij
 ladd : ℕ → Bij → Bij
 suc' : Bij → Bij
 
@@ -37,10 +36,11 @@ data Bij where
   yb   : {n : Bij} → swap (suc' n) ∙ cong suc' (swap n) ∙ swap (suc' n) ≡ cong suc' (swap n) ∙ swap (suc' n) ∙ cong suc' (swap n)
   gpd  : isGroupoid Bij
 
+suc' = suc
+
+Bij-fromℕ : ℕ → Bij
 Bij-fromℕ zero = zero
 Bij-fromℕ (suc n) = suc (Bij-fromℕ n)
-
-suc' = suc
 
 suc𝔹 : 𝔹 → 𝔹
 suc𝔹 (obj n) = obj (suc n)
