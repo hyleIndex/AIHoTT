@@ -90,7 +90,7 @@ nf-isSet {suc n} = isSet× isSetFin nf-isSet
 -- -- rm {n} f j' | suc i , i<sn | j , j<sn = {!!}
 
 Fin-rm : {n : ℕ} (i : Fin (suc n)) → Σ (Fin (suc n)) (λ j → j ≢ i) ≃ Fin n
-Fin-rm {n} (i , i<sn) = isoToEquiv (iso {!!} {!!} {!!} {!!})
+Fin-rm {n} (i , i<sn) = isoToEquiv (iso f g {!!} {!!})
   where
   -- f : (i : Fin (suc n)) → Σ (Fin (suc n)) (λ j → j ≢ i) → Fin n
   -- f (zero , i<sn) ((zero , j<sn) , j≢i) = ⊥.rec (j≢i (Fin≡ refl))
@@ -106,6 +106,17 @@ Fin-rm {n} (i , i<sn) = isoToEquiv (iso {!!} {!!} {!!} {!!})
   g (j , j<sn) with <-dec j i
   g (j , j<sn) | yes j<i = (j , ≤-trans j<sn (≤-suc ≤-refl)) , λ p → <-≢ j<i (cong fst p)
   g (j , j<sn) | no ¬j<i = (suc j , suc-≤-suc j<sn) , λ p → {!!} -- i ≤ j
+  f-g : (j : Fin n) → f (g j) ≡ j
+  f-g (j , j<n) with <-dec j i
+  f-g (j , j<n) | yes p = {!!}
+  f-g (j , j<n) | no ¬p = {!!}
+  g-f : (x : Σ (Fin (suc n)) (λ j → j ≢ (i , i<sn))) → g (f x) ≡ x
+  g-f (j , j≢i) = ΣPathP (g-f-fst (j , j≢i) , toPathP (funExt λ _ → isProp⊥ _ _))
+    where
+    g-f-fst : (j : Σ (Fin (suc n)) (λ j → j ≢ (i , i<sn))) → fst (g (f j)) ≡ fst j
+    g-f-fst ((j , j<sn) , j≢i) with <-dec i j
+    ... | yes p = {!!}
+    ... | no ¬p = {!!}
 
 rm : {n : ℕ} (f : Fin (suc n) → Fin (suc n)) → isEmbedding f → Fin n → Fin n
 rm {n} f e j' with inspect (f fzero) | inspect (f (fsuc j'))
