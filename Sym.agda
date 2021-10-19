@@ -111,7 +111,7 @@ Fin-rm {n} (i , i<sn) = isoToEquiv (iso f g {!!} {!!})
   g : Fin n → Σ (Fin (suc n)) (λ j → j ≢ (i , i<sn))
   g (j , j<sn) with <-dec j i
   g (j , j<sn) | yes j<i = (j , ≤-trans j<sn (≤-suc ≤-refl)) , λ p → <-≢ j<i (cong fst p)
-  g (j , j<sn) | no ¬j<i = (suc j , suc-≤-suc j<sn) , λ p → {!!} -- i ≤ j
+  g (j , j<sn) | no ¬j<i = (suc j , suc-≤-suc j<sn) , λ p → ¬j<i (0 , cong fst p)
   f-g : (j : Fin n) → f (g j) ≡ j
   f-g (j , j<n) with <-dec j i
   f-g (j , j<n) | yes p = {!!}
@@ -128,8 +128,8 @@ rm : {n : ℕ} (f : Fin (suc n) → Fin (suc n)) → isEmbedding f → Fin n →
 rm {n} f e j' with inspect (f fzero) | inspect (f (fsuc j'))
 ... | (zero , i<sn) , f0≡i | (zero , j<sn) , fsj'≡j = ⊥.rec (znots (cong fst (invEq (_ , e fzero (fsuc j')) (f0≡i ∙ sym (Fin≡ (cong fst fsj'≡j)))))) -- both zero and s j' are sent to 0: impossible because f is an embedding
 ... | (zero , i<sn) , f0≡i | (suc j , j<sn) , fsj'≡j = j , (fst j<sn , +-suc _ _ ∙ injSuc (cong suc (sym (+-suc _ _)) ∙ sym (+-suc _ _) ∙ snd j<sn))
-... | (suc i , i<sn) , f0≡i | (zero , j<sn) , fsj'≡j = zero , {!!}
-... | (suc i , i<sn) , f0≡i | (suc j , j<sn) , fsj'≡j = {!!}
+... | (suc i , (k , p)) , f0≡i | (zero , j<sn) , fsj'≡j = zero , (k + i , ((sym (+-assoc k i 1)) ∙ (cong (λ a → k + a) (+-comm i 1))) ∙ injSuc(sym(+-suc k (suc i)) ∙ p))
+... | (suc i , (k , p)) , f0≡i | (suc j , j<sn) , fsj'≡j = zero , (k + i , ((sym (+-assoc k i 1)) ∙ (cong (λ a → k + a) (+-comm i 1))) ∙ injSuc(sym(+-suc k (suc i)) ∙ p))
 
 rm≃ : {n : ℕ} (e : S (suc n)) → Fin n ≃ Fin n
 rm≃ e = {!!}
