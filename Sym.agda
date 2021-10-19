@@ -67,7 +67,14 @@ Fin≡ {k} {m} {n} p i = (p i) , q i
   q : PathP (λ i → p i < k) (snd m) (snd n)
   q = toPathP (m≤n-isProp _ _)
 
--- postulate Fin<Dec : {n : ℕ} → (i j : Fin n) → Dec (i < j)
+-- one inclusion of Fin into the next (the canonical one being fsuc)
+fweak : {n : ℕ} (i : Fin n) → Fin (suc n)
+fweak (zero , i<n) = zero , suc-≤-suc zero-≤
+fweak (suc i , i<n) = suc i , suc-≤-suc (≤-trans (≤-suc ≤-refl) i<n)
+
+---
+--- Let's go
+---
 
 -- the symmetric group
 S : (n : ℕ) → Type₀
@@ -208,13 +215,15 @@ S≃nf (suc n) =
 --- Comparison with Bij
 ---
 
--- presentaiton of Bij n
+-- presentation of Bij n
 data Sym : ℕ → Type₀ where
-  -- swap : {n : ℕ} → Fin n → Sym (suc (suc n)) → Sym (suc (suc n))
-  swap : {l : ℕ} → (r : ℕ) → Sym (l + 2 + r) → Sym (l + 2 + r)
-  -- inv  : (n : Bij) → swap n ∙ swap n ≡ refl
-  -- xchg : {k : ℕ} {n : Bij} →
-         -- cong (ladd (suc (suc k))) (swap n) ∙ swap (ladd k (suc' (suc' n))) ≡
-         -- swap (ladd k (suc' (suc' n))) ∙ cong (ladd (suc (suc k))) (swap n)
-  -- yb   : {n : Bij} → swap (suc' n) ∙ cong suc' (swap n) ∙ swap (suc' n) ≡ cong suc' (swap n) ∙ swap (suc' n) ∙ cong suc' (swap n)
-  -- gpd  : isGroupoid Bij
+  nop : {n : ℕ} → Sym n
+  -- exchange braids i and i+1
+  swap : {n : ℕ} (i : Fin n) → Sym (2 + n) → Sym (2 + n)
+  inv  : {n : ℕ} (i : Fin n) (s : Sym (2 + n)) → swap i (swap i s) ≡ s
+  xchg : {n : ℕ} (i j : Fin n) → 2 + fst i ≤ fst j → (s : Sym (2 + n)) → swap i (swap j s) ≡ swap j (swap i s)
+  yb   : {n : ℕ} (i : Fin n) (s : Sym (3 + n)) → swap (fweak i) (swap (fsuc i) (swap (fweak i) s)) ≡ swap (fsuc i) (swap (fweak i) (swap (fsuc i) s))
+  set  : {n : ℕ} → isSet (Sym n)
+
+thm : {n : ℕ} → Sym n ≃ nf n
+thm = ?

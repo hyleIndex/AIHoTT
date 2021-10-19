@@ -8,7 +8,8 @@ open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.HLevels
-open import Data.Nat
+open import Cubical.Data.Nat
+open import Cubical.Data.Nat.Properties
 open import Cubical.Data.Fin
 
 data 𝔹 : Type₁ where
@@ -41,6 +42,12 @@ suc' = suc
 Bij-fromℕ : ℕ → Bij
 Bij-fromℕ zero = zero
 Bij-fromℕ (suc n) = suc (Bij-fromℕ n)
+
+end : (m n : ℕ) → Bij-fromℕ m ≡ Bij-fromℕ n → m ≡ n
+end zero zero p = refl
+end zero (suc n) p = {!!}
+end (suc m) zero p = {!!}
+end (suc m) (suc n) p = cong suc (end m n {!injSuc p!})
 
 suc𝔹 : 𝔹 → 𝔹
 suc𝔹 (obj n) = obj (suc n)
