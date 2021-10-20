@@ -187,7 +187,7 @@ Ss n = isoToEquiv (iso f g {!!} {!!})
   f : S (suc n) → Fin (suc n) × S n
   f e = (fst e fzero) , rm≃ e
   g : Fin (suc n) × S n → S (suc n)
-  g (i , e) = compEquiv {!e!} (send≃ i)
+  g (i , e) = compEquiv (shift≃ e) (send≃ i)
 
 S≃nf : (n : ℕ) → S n ≃ nf n
 S≃nf zero = S0≃Unit
