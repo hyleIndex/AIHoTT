@@ -8,7 +8,7 @@ open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Equiv.Properties
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Univalence
-open import Cubical.Foundations.HLevels
+open import Cubical.Foundations.HLevels hiding (extend)
 open import Cubical.Functions.Embedding
 open import Cubical.HITs.SetTruncation
 open import Cubical.Data.Empty as ⊥
@@ -71,6 +71,9 @@ Fin≡ {k} {m} {n} p i = (p i) , q i
   q : PathP (λ i → p i < k) (snd m) (snd n)
   q = toPathP (m≤n-isProp _ _)
 
+Fin' : (n : ℕ) → (i : Fin n) → Type₀
+Fin' n i = Σ (Fin n) (λ j → j ≢ i)
+
 -- one inclusion of Fin into the next (the canonical one being fsuc)
 fweak : {n : ℕ} (i : Fin n) → Fin (suc n)
 fweak (zero , i<n) = zero , suc-≤-suc zero-≤
@@ -124,15 +127,29 @@ Fin-rm {n} (i , i<sn) = isoToEquiv (iso f g {!!} {!!})
     ... | yes p = {!!}
     ... | no ¬p = {!!}
 
-rm : {n : ℕ} (f : Fin (suc n) → Fin (suc n)) → isEmbedding f → Fin n → Fin n
-rm {n} f e j' with inspect (f fzero) | inspect (f (fsuc j'))
-... | (zero , i<sn) , f0≡i | (zero , j<sn) , fsj'≡j = ⊥.rec (znots (cong fst (invEq (_ , e fzero (fsuc j')) (f0≡i ∙ sym (Fin≡ (cong fst fsj'≡j)))))) -- both zero and s j' are sent to 0: impossible because f is an embedding
-... | (zero , i<sn) , f0≡i | (suc j , j<sn) , fsj'≡j = j , (fst j<sn , +-suc _ _ ∙ injSuc (cong suc (sym (+-suc _ _)) ∙ sym (+-suc _ _) ∙ snd j<sn))
-... | (suc i , (k , p)) , f0≡i | (zero , j<sn) , fsj'≡j = zero , (k + i , ((sym (+-assoc k i 1)) ∙ (cong (λ a → k + a) (+-comm i 1))) ∙ injSuc(sym(+-suc k (suc i)) ∙ p))
-... | (suc i , (k , p)) , f0≡i | (suc j , j<sn) , fsj'≡j = zero , (k + i , ((sym (+-assoc k i 1)) ∙ (cong (λ a → k + a) (+-comm i 1))) ∙ injSuc(sym(+-suc k (suc i)) ∙ p))
+-- the equivalence e without i in the input and e i in the output
+restrict : {n : ℕ} (e : S (suc n)) (i : Fin (suc n)) → Σ (Fin (suc n)) (λ j → j ≢ i) ≃ Σ (Fin (suc n)) (λ j → j ≢ fst e i)
+restrict {n} e i = isoToEquiv (iso f g {!!} {!!})
+  where
+  f : Fin' (suc n) i → Fin' (suc n) (fst e i)
+  f (j , j<sn) = fst e j , {!!} -- because f injective
+  g : Fin' (suc n) (fst e i) → Fin' (suc n) i
+  g (j , j<sn) = invEq e j , {!!} -- because f⁻¹ injective
 
 rm≃ : {n : ℕ} (e : S (suc n)) → Fin n ≃ Fin n
-rm≃ e = {!!}
+rm≃ {n} e =
+  Fin n ≃⟨ invEquiv (Fin-rm fzero) ⟩
+  Σ (Fin (suc n)) (λ j → j ≢ fzero) ≃⟨ restrict e fzero ⟩
+  Σ (Fin (suc n)) (λ j → j ≢ fst e fzero) ≃⟨ Fin-rm (fst e fzero) ⟩
+  Fin n ■
+
+-- like e but shifted by +1
+shift≃ : {n : ℕ} → S n → S (suc n)
+shift≃ {n} e = isoToEquiv (iso f {!!} {!!} {!!})
+  where
+  f : Fin (suc n) → Fin (suc n)
+  f (zero , i<sn) = zero , i<sn
+  f (suc i , i<sn) = fsuc (fst e (i , (pred-≤-pred i<sn)))
 
 -- -- TODO: "remove" (f 0)-th element
 -- rm-≃ : {n : ℕ} → S (suc n) → S n
@@ -142,14 +159,14 @@ rm≃ e = {!!}
 -- S→nf {zero} f = tt
 -- S→nf {suc n} f = fst f fzero , S→nf {n} (rm-≃ f)
 
--- -- send 0-th element to i and leave others untouched
+-- send 0-th element to i and leave others untouched
 send : {n : ℕ} → Fin n → Fin n → Fin n
 send {n} (zero , i<n) (j , j<n) = j , j<n
 send {zero} (suc i , i<n) (j , j<n) = ⊥.rec (¬-<-zero j<n)
 send {suc n} (suc i , i<n) (zero , j<n) = zero , j<n
 send {suc n} (suc i , i<n) (suc j , j<n) = fsuc (send {n} (i , pred-≤-pred i<n) (j , (pred-≤-pred j<n)))
 
--- -- TODO: not easy, or we could define the inverse?
+-- TODO: not easy, or we could define the inverse?
 send² : {n : ℕ} (i j : Fin n) → send i (send i j) ≡ j
 send² {n} (zero , i<n) (j , j<n) = refl
 send² {zero} (suc i , i<n) (j , j<n) = ⊥.rec (¬-<-zero j<n)
@@ -159,46 +176,8 @@ send² {suc n} (suc i , i<n) (suc j , j<n) = {!cong fsuc ?!}
 send≃ : {n : ℕ} → (i : Fin n) → S n
 send≃ {n} i = isoToEquiv (iso (send i) (send i) (send² i) (send² i))
 
--- Fin-id : (n : ℕ) → Fin n ≃ Fin n
--- Fin-id n = isoToEquiv (iso f f (λ _ → refl) λ _ → refl)
-  -- where
-  -- f : Fin n → Fin n
-  -- f x = x
-
--- Fin-lift-fun : {m n : ℕ} → (Fin m → Fin n) → Fin (suc m) → Fin (suc n)
--- Fin-lift-fun f (zero , i<m) = zero , suc-≤-suc zero-≤
--- Fin-lift-fun f (suc i , i<m) = fsuc (f (i , (pred-≤-pred i<m)))
-
--- -- equivalence sending 0 to 0 and behaving as e otherwise
--- cong-fsuc-≃ : {n : ℕ} → Fin n ≃ Fin n → Fin (suc n) ≃ Fin (suc n)
--- cong-fsuc-≃ {n} e = isoToEquiv (iso f g f-g g-f)
-  -- where
-  -- f : Fin (suc n) → Fin (suc n)
-  -- f = Fin-lift-fun (fst e)
-  -- g : Fin (suc n) → Fin (suc n)
-  -- g = Fin-lift-fun (invEq e)
-  -- g-f : (i : Fin (suc n)) → g (f i) ≡ i
-  -- g-f (zero , i<sn) = ΣPathP (refl , m≤n-isProp _ _)
-  -- g-f (suc i , i<sn) = ΣPathP ((cong suc {!!}) , m≤n-isProp _ _) -- should be easy by induction
-  -- f-g : (i : Fin (suc n)) → f (g i) ≡ i
-  -- f-g = {!!} -- similar as above
-
--- nf→S : {n : ℕ} → nf n → S n
--- nf→S {zero} tt = Fin-id 0
--- nf→S {suc n} (i , f) = compEquiv (send≃ i) (cong-fsuc-≃ (nf→S f))
-
--- S-nf-S : {n : ℕ} (f : S n) → nf→S (S→nf f) ≡ f
--- S-nf-S e@(f , _) = equivEq (nf→S (S→nf e)) e (funExt (λ j → {!!}))
-
--- nf-S-nf : {n : ℕ} (f : nf n) → S→nf (nf→S f) ≡ f
--- nf-S-nf {zero} tt = refl
--- nf-S-nf {suc n} (i , f) = {!!}
-
--- -- S≃nf : (n : ℕ) → S n ≃ nf n
--- -- S≃nf n = isoToEquiv (iso S→nf nf→S nf-S-nf S-nf-S)
-
 S0≃Unit : S 0 ≃ Unit
-S0≃Unit = isoToEquiv (iso (λ _ → tt) (λ _ → idEquiv (Fin 0)) (λ { tt → refl }) (λ e → equivEq (funExt λ { (i , i<0) → ⊥.rec (¬-<-zero i<0) })))
+S0≃Unit = isoToEquiv (iso (λ _ → tt) (λ _ → idEquiv (Fin 0)) (λ { tt → refl }) (λ e → equivEq _ _ (funExt λ { (i , i<0) → ⊥.rec (¬-<-zero i<0) })))
 
 Ss : (n : ℕ) → S (suc n) ≃ Fin (suc n) × S n
 Ss n = isoToEquiv (iso f g {!!} {!!})
@@ -206,7 +185,7 @@ Ss n = isoToEquiv (iso f g {!!} {!!})
   f : S (suc n) → Fin (suc n) × S n
   f e = (fst e fzero) , rm≃ e
   g : Fin (suc n) × S n → S (suc n)
-  g (i , e) = send≃ i
+  g (i , e) = compEquiv {!e!} (send≃ i)
 
 S≃nf : (n : ℕ) → S n ≃ nf n
 S≃nf zero = S0≃Unit
@@ -224,10 +203,20 @@ data Sym : ℕ → Type₀ where
   nop : {n : ℕ} → Sym n
   -- exchange braids i and i+1
   swap : {n : ℕ} (i : Fin n) → Sym (2 + n) → Sym (2 + n)
+  -- quotient
   inv  : {n : ℕ} (i : Fin n) (s : Sym (2 + n)) → swap i (swap i s) ≡ s
   xchg : {n : ℕ} (i j : Fin n) → 2 + fst i ≤ fst j → (s : Sym (2 + n)) → swap i (swap j s) ≡ swap j (swap i s)
   yb   : {n : ℕ} (i : Fin n) (s : Sym (3 + n)) → swap (fweak i) (swap (fsuc i) (swap (fweak i) s)) ≡ swap (fsuc i) (swap (fweak i) (swap (fsuc i) s))
   set  : {n : ℕ} → isSet (Sym n)
+
+Sym→S : {n : ℕ} → Sym n → S n
+Sym→S = {!!}
+
+Sym→nf : {n : ℕ} → Sym n → nf n
+Sym→nf {n} e = fst (S≃nf n) (Sym→S e)
+
+nf→Sym : {n : ℕ} → nf n → Sym n
+nf→Sym = {!!}
 
 thm : {n : ℕ} → Sym n ≃ nf n
 thm = {!!}
