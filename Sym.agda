@@ -160,6 +160,8 @@ shift≃ {n} e = isoToEquiv (iso f {!!} {!!} {!!})
 -- S→nf {suc n} f = fst f fzero , S→nf {n} (rm-≃ f)
 
 -- send 0-th element to i and leave others untouched
+-- SM : note, it might be easier to generalize to sending i to j, because the
+-- inverse is also of this form
 send : {n : ℕ} → Fin n → Fin n → Fin n
 send {n} (zero , i<n) (j , j<n) = j , j<n
 send {zero} (suc i , i<n) (j , j<n) = ⊥.rec (¬-<-zero j<n)
