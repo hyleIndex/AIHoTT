@@ -71,8 +71,14 @@ Fin≡ {k} {m} {n} p i = (p i) , q i
   q : PathP (λ i → p i < k) (snd m) (snd n)
   q = toPathP (m≤n-isProp _ _)
 
-Fin' : (n : ℕ) → (i : Fin n) → Type₀
-Fin' n i = Σ (Fin n) (λ j → j ≢ i)
+Fin' : {n : ℕ} (i : Fin n) → Type₀
+Fin' {n} i = Σ (Fin n) (λ j → j ≢ i)
+
+toFin : {n : ℕ}{i : Fin n} → Fin' i → Fin n
+toFin = fst
+
+toFin-inj : {n : ℕ}{i : Fin n} → {j k : Fin' i} → toFin j ≡ toFin k → j ≡ k
+toFin-inj = Σ≡Prop (λ _ → isPropΠ λ _ → ⊥.isProp⊥)
 
 -- one inclusion of Fin into the next (the canonical one being fsuc)
 fweak : {n : ℕ} (i : Fin n) → Fin (suc n)
@@ -128,13 +134,17 @@ Fin-rm {n} (i , i<sn) = isoToEquiv (iso f g {!!} {!!})
     ... | no ¬p = {!!}
 
 -- the equivalence e without i in the input and e i in the output
-restrict : {n : ℕ} (e : S (suc n)) (i : Fin (suc n)) → Σ (Fin (suc n)) (λ j → j ≢ i) ≃ Σ (Fin (suc n)) (λ j → j ≢ fst e i)
+restrict : {n : ℕ} (e : S (suc n)) (i : Fin (suc n)) → Fin' {suc n} i ≃ Fin' {suc n} (fst e i)
 restrict {n} e i = isoToEquiv (iso f g {!!} {!!})
   where
-  f : Fin' (suc n) i → Fin' (suc n) (fst e i)
-  f (j , j<sn) = fst e j , {!!} -- because f injective
-  g : Fin' (suc n) (fst e i) → Fin' (suc n) i
-  g (j , j<sn) = invEq e j , {!!} -- because f⁻¹ injective
+  f : Fin' i → Fin' (fst e i)
+  f (j , j<sn) = fst e j , λ p → j<sn ((sym (retEq e j)) ∙ (cong (invEq e) p) ∙ (retEq e i))
+  g : Fin' (fst e i) → Fin' i
+  g (j , j<sn) = invEq e j , λ p → j<sn ((sym (secEq e j)) ∙ cong (fst e) p)
+  f-g : ∀ n → f (g n) ≡ n
+  f-g (j , j<sn) = {!!}
+  g-f : ∀ n → g (f n) ≡ n
+  g-f (j , j<sn) = {!!}
 
 rm≃ : {n : ℕ} (e : S (suc n)) → Fin n ≃ Fin n
 rm≃ {n} e =
@@ -145,11 +155,16 @@ rm≃ {n} e =
 
 -- like e but shifted by +1
 shift≃ : {n : ℕ} → S n → S (suc n)
-shift≃ {n} e = isoToEquiv (iso f {!!} {!!} {!!})
+shift≃ {n} e = isoToEquiv (iso f g {!!} {!!})
   where
   f : Fin (suc n) → Fin (suc n)
   f (zero , i<sn) = zero , i<sn
   f (suc i , i<sn) = fsuc (fst e (i , (pred-≤-pred i<sn)))
+  g : Fin (suc n) → Fin (suc n)
+  g (zero , i<sn) = zero , i<sn
+  g (suc i , i<sn) = fsuc (invEq e (i , (pred-≤-pred i<sn)))
+  f-g : ∀ n → f (g n) ≡ n
+  f-g (j , j<sn) = {!!}
 
 -- -- TODO: "remove" (f 0)-th element
 -- rm-≃ : {n : ℕ} → S (suc n) → S n
@@ -179,7 +194,7 @@ send≃ : {n : ℕ} → (i : Fin n) → S n
 send≃ {n} i = isoToEquiv (iso (send i) (send i) (send² i) (send² i))
 
 S0≃Unit : S 0 ≃ Unit
-S0≃Unit = isoToEquiv (iso (λ _ → tt) (λ _ → idEquiv (Fin 0)) (λ { tt → refl }) (λ e → equivEq _ _ (funExt λ { (i , i<0) → ⊥.rec (¬-<-zero i<0) })))
+S0≃Unit = isoToEquiv (iso (λ _ → tt) (λ _ → idEquiv (Fin 0)) (λ { tt → refl }) (λ e → equivEq (funExt λ { (i , i<0) → ⊥.rec (¬-<-zero i<0) })))
 
 Ss : (n : ℕ) → S (suc n) ≃ Fin (suc n) × S n
 Ss n = isoToEquiv (iso f g {!!} {!!})
