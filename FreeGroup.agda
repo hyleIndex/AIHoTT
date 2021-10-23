@@ -165,20 +165,6 @@ module FGByList {A : Type₀} (AIsSet : isSet A) where
   +-hom : (x y : FA) → ∥ x ∥ + ∥ y ∥ ≡ ∥ x ++ y ∥
   +-hom x y = refl
 
---  lem : ∀ a b → rel a b → rel (finv a) (finv b)
---  lem a b (u , v , y , p , q) = (finv v , finv u , y , p' , q')
---        where
---          p' = finv a ≡⟨ cong (finv) p ⟩
---               finv (u ++ y ∷ inv y ∷ v) ≡⟨ ++-finv-hom u ([ y ] ++ [ inv y ] ++ v) ⟩
---               finv ([ y ] ++ [ inv y ] ++ v) ++ finv u ≡⟨ cong (λ z → ((finv z) ++ (finv u))) (sym (++-assoc [ y ] [ inv y ] v)) ⟩
---               finv (([ y ] ++ [ inv y ]) ++ v) ++ finv u ≡⟨ cong (λ z → z ++ finv u) (++-finv-hom ([ y ] ++ [ inv y ]) v) ⟩
---               (finv v ++ [ inv (inv y) ] ++ [ inv y ]) ++ finv u ≡⟨ cong (λ z → (finv v ++ [ z ] ++ [ inv y ]) ++ finv u) (inv-invol y) ⟩
---               (finv v ++ [ y ] ++ [ inv y ]) ++ finv u ≡⟨ ++-assoc (finv v) ([ y ] ++ [ inv y ]) (finv u) ⟩
---               finv v ++ [ y ] ++ [ inv y ] ++ finv u     ∎
---          q' = finv b ≡⟨ cong finv q ⟩
---               finv (u ++ v) ≡⟨ ++-finv-hom u v ⟩
---               finv v ++ finv u ∎
-
   rel-ex-inv : ∀ a b → rel-ex a b → rel-ex (finv a) (finv b)
   rel-ex-inv a b (u , v , x , inl(p , q)) = finv v , finv u , x , inl(p' , q')
     where
