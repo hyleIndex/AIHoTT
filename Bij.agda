@@ -43,14 +43,14 @@ Bij-fromℕ : ℕ → Bij
 Bij-fromℕ zero = zero
 Bij-fromℕ (suc n) = suc (Bij-fromℕ n)
 
--- Bij-toℕ : Bij → ℕ
--- Bij-toℕ zero = zero
--- Bij-toℕ (suc x) = suc (Bij-toℕ x)
--- Bij-toℕ (swap x i) = refl {x = (suc (suc (Bij-toℕ x)))} i
--- Bij-toℕ (inv x i i₁) = {!isSetℕ (suc (suc (Bij-toℕ x))) (suc (suc (Bij-toℕ x))) (refl) (refl) i i₁!}
--- Bij-toℕ (xchg {k = k} {n = n} i i₁) = {!suc (suc (Bij-toℕ (ladd k (suc' (suc' n)))))!}
--- Bij-toℕ (yb i i₁) = {!!}
--- Bij-toℕ (gpd x x₁ x₂ y x₃ y₁ i i₁ x₄) = {!!}
+Bij-toℕ : Bij → ℕ
+Bij-toℕ zero = zero
+Bij-toℕ (suc x) = suc (Bij-toℕ x)
+Bij-toℕ (swap x i) = refl {x = (suc (suc (Bij-toℕ x)))} i
+Bij-toℕ (inv x i i₁) = {!isSetℕ (suc (suc (Bij-toℕ x))) (suc (suc (Bij-toℕ x))) (refl) (refl) i i₁!}
+Bij-toℕ (xchg {k = k} {n = n} i i₁) = {!suc (suc (Bij-toℕ (ladd k (suc' (suc' n)))))!}
+Bij-toℕ (yb i i₁) = {!!}
+Bij-toℕ (gpd x x₁ x₂ y x₃ y₁ i i₁ x₄) = {!!}
 
 -- SM: I am really not sure about how we should proceed to prove this one which
 -- should be needed to show that Bij ≃ Σ ℕ (λ n → Sym n)

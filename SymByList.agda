@@ -95,6 +95,23 @@ snd (≤s {i} (k , p)) = (sym (+-suc k i)) ∙ p
 ListWithOrder : ℕ → Type₀
 ListWithOrder n = Σ _ (λ l → n >L l)
 
+PushIn->L : {n m : ℕ} → (n ≤ m) → (x : LehmerCode n) → Σ (LehmerCode m) (λ y → LehmerCode→Trans y ≡ LehmerCode→Trans x)
+PushIn->L {n} {m} (zero , p) x = ( transport (cong (LehmerCode) p) x , {! (transport-filler (cong LehmerCode p) x)!} )
+  where
+    lem : transport (cong (LehmerCode) p) x ≡ {!!}
+    lem = {!!}
+PushIn->L {n} {m} (suc j , n≤m) x = {!(j + n , j+n<m) :: ?!} , {!!}
+  where
+    j+n<m : j + n < m
+    j+n<m = zero , n≤m
+
+PushOut->L : {n : ℕ} → (x : LehmerCode n) → (m : ℕ) → (m >L (LehmerCode→Trans x)) → Σ (LehmerCode m) (λ y → LehmerCode→Trans y ≡ LehmerCode→Trans x)
+PushOut->L {zero} x m y = PushIn->L {m = m} zero-≤ []
+PushOut->L {suc n} ((zero , p) :: xs) m y = fst (PushOut->L {n} xs m (transport (cong (λ a → m >L a) (++-unit-r (LehmerCode→Trans xs))) y)) ,
+                                            snd (PushOut->L {n} xs m (transport (cong (λ a → m >L a) (++-unit-r (LehmerCode→Trans xs))) y)) ∙ sym (++-unit-r (LehmerCode→Trans xs))
+PushOut->L {suc n} ((suc x , p) :: xs) zero y = ⊥.elim {!!}
+PushOut->L {suc n} ((suc x , p) :: xs) (suc m) y = {!!}
+
 -- I have shown that >L is a prop, and we have l1.fst ≡ l2.fst so it should be able to
 -- use >L-Prop. But I don't know how to use this
 
@@ -138,9 +155,7 @@ Lehmer→Sym-injective : {n : ℕ} → (x1 x2 : LehmerCode (suc n)) → (Lehmer�
 Lehmer→Sym-injective x1 x2 p = {!!}
 
 Sym→Lehmer-Helper : {n : ℕ} → (x : List (Fin (suc n))) → Σ (LehmerCode (suc n)) (λ y → x ∼ Lehmer→Sym y)
-Sym→Lehmer-Helper {zero} [] = ( {!!} , {!!} )
-Sym→Lehmer-Helper {zero} (x ∷ x₁) = {!!}
-Sym→Lehmer-Helper {suc n} x = {!!}
+Sym→Lehmer-Helper = {!!}
 
 Sym→Lehmer : {n : ℕ} →  List (Fin n) → LehmerCode n
 Sym→Lehmer {zero} [] = []
