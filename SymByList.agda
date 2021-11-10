@@ -45,6 +45,10 @@ m -ℕ 0 = m
 0 -ℕ (suc n) = 0
 (suc m) -ℕ (suc n) = m -ℕ n
 
+-ℕ-cancelˡ : ∀ k m n → (k + m) -ℕ (k + n) ≡ m -ℕ n
+-ℕ-cancelˡ zero    = λ _ _ → refl
+-ℕ-cancelˡ (suc k) = -ℕ-cancelˡ k
+
 _↓_ : (n : ℕ) → (k : ℕ) → List ℕ
 n ↓ zero = []
 n ↓ suc k = (k + n) ∷ (n ↓ k)
@@ -64,6 +68,12 @@ data _>L_ : ℕ → List ℕ → Type₀ where
 ≤s : {i j : ℕ} → suc i ≤ j → i ≤ j
 fst (≤s (k , p)) = suc k
 snd (≤s {i} (k , p)) = (sym (+-suc k i)) ∙ p
+
+getOrderFrom>L : {n : ℕ} {a : ℕ} {l l1 l2 : List ℕ} → (n >L l) → (l ≡ l1 ++ (a ∷ l2)) → (a < n)
+getOrderFrom>L {n = n} {l = .[]} {l1 = []} {l2 = l2} largerThenEmpty p = ⊥.elim (¬cons≡nil (sym p))
+getOrderFrom>L {n = n} {l = .(k ∷ _)} {l1 = []} {l2 = l2} (k :⟨ x ⟩: ln) p = transport (cong (λ k → (k < n)) (cons-inj₁ p)) x
+getOrderFrom>L {n = n} {l = []} {l1 = x ∷ l1} {l2 = l2} ln p = ⊥.elim (¬cons≡nil (sym p))
+getOrderFrom>L {n = n} {l = x₁ ∷ l} {l1 = x ∷ l1} {l2 = l2} (_ :⟨ _ ⟩: ln) p = getOrderFrom>L ln (cons-inj₂ p)
 
 >L-↓ : (n k r : ℕ) → (r + k ≤ n) → (n >L (k ↓ r))
 >L-↓ n k zero r+k≤n = largerThenEmpty
@@ -95,28 +105,51 @@ snd (≤s {i} (k , p)) = (sym (+-suc k i)) ∙ p
 ListWithOrder : ℕ → Type₀
 ListWithOrder n = Σ _ (λ l → n >L l)
 
-PushIn->L : {n m : ℕ} → (n ≤ m) → (x : LehmerCode n) → Σ (LehmerCode m) (λ y → LehmerCode→Trans y ≡ LehmerCode→Trans x)
-PushIn->L {n} {m} (zero , p) x = ( transport (cong (LehmerCode) p) x , {! (transport-filler (cong LehmerCode p) x)!} )
+data _≤′_ (m : ℕ) : ℕ → Set where
+  ≤′-refl :                         m ≤′ m
+  ≤′-step : ∀ {n} (m≤′n : m ≤′ n) → m ≤′ suc n
+
+private
+  ≤′→≤ : {n : ℕ} {m : ℕ} → (n ≤′ m) → (n ≤ m)
+  ≤′→≤ {n = n} {m = .n} ≤′-refl = zero , refl
+  ≤′→≤ {n = n} {m = .(suc n₁)} (≤′-step {n = n₁} p) = suc (fst f) , cong suc (snd f)
+    where
+      f = ≤′→≤ p
+
+  ≤→≤′ : {n : ℕ} {m : ℕ} → (n ≤ m) → (n ≤′ m)
+  ≤→≤′ {n = zero} {m = zero} (x , p) = ≤′-refl
+  ≤→≤′ {n = suc n} {m = zero} f = ⊥.elim (¬-<-zero {m = n} (fst f , snd f))
+  ≤→≤′ {n = n} {m = suc m} (zero , p) = transport (sym (cong (λ k → (k ≤′ (suc m))) p)) ≤′-refl
+  ≤→≤′ {n = n} {m = suc m} (suc x , p) = ≤′-step (≤→≤′ (x , injSuc p))
+
+PushIn->L : {n m : ℕ} → (n ≤′ m) → (x : LehmerCode n) → Σ (LehmerCode m) (λ y → LehmerCode→Trans y ≡ LehmerCode→Trans x)
+PushIn->L {n} {.n} ≤′-refl x = x , refl
+PushIn->L {n} {.(suc n₁)} (≤′-step {n = n₁} p) x = ((zero , n₁ , +-comm n₁ 1) :: (fst tmp)) , ++-unit-r (LehmerCode→Trans (fst tmp)) ∙ (snd tmp)
   where
-    lem : transport (cong (LehmerCode) p) x ≡ {!!}
-    lem = {!!}
-PushIn->L {n} {m} (suc j , n≤m) x = {!(j + n , j+n<m) :: ?!} , {!!}
-  where
-    j+n<m : j + n < m
-    j+n<m = zero , n≤m
+    tmp = PushIn->L {n} {n₁} (p) x
 
 PushOut->L : {n : ℕ} → (x : LehmerCode n) → (m : ℕ) → (m >L (LehmerCode→Trans x)) → Σ (LehmerCode m) (λ y → LehmerCode→Trans y ≡ LehmerCode→Trans x)
-PushOut->L {zero} x m y = PushIn->L {m = m} zero-≤ []
+PushOut->L {zero} x m y = PushIn->L (≤→≤′ zero-≤) x
 PushOut->L {suc n} ((zero , p) :: xs) m y = fst (PushOut->L {n} xs m (transport (cong (λ a → m >L a) (++-unit-r (LehmerCode→Trans xs))) y)) ,
                                             snd (PushOut->L {n} xs m (transport (cong (λ a → m >L a) (++-unit-r (LehmerCode→Trans xs))) y)) ∙ sym (++-unit-r (LehmerCode→Trans xs))
-PushOut->L {suc n} ((suc x , p) :: xs) zero y = ⊥.elim {!!}
-PushOut->L {suc n} ((suc x , p) :: xs) (suc m) y = {!!}
-
--- I have shown that >L is a prop, and we have l1.fst ≡ l2.fst so it should be able to
--- use >L-Prop. But I don't know how to use this
+PushOut->L {suc n} ((suc x , p) :: xs) zero y = ⊥.elim (¬-<-zero  (getOrderFrom>L y refl))
+PushOut->L {suc n} ((suc x , p) :: xs) (suc m) y = PushIn->L {m = suc m} (≤→≤′ (subst (λ k → k ≤ (suc m)) (cong suc tmp) (getOrderFrom>L y refl))) ((suc x , p) :: xs)
+  where
+    tmp = x + (n -ℕ x)
+            ≡⟨ cong (λ k → x + k) (sym (cong (λ k → (k -ℕ x)) (snd f)) ∙ cong (λ k → (k -ℕ x)) (+-assoc (fst f) 1 x)
+              ∙ cong (λ k → ((k + x) -ℕ x)) (+-comm (fst f) 1) ∙ cong (λ k → (k -ℕ x)) (+-comm (suc (fst f)) x)
+              ∙ cong (λ k → ((x + suc (fst f)) -ℕ k)) (sym (+-zero x)) ∙ -ℕ-cancelˡ x (suc (fst f)) zero) ⟩
+          x + (suc (fst f))
+            ≡⟨ (+-comm x (suc (fst f)) ∙ (cong suc (+-comm (fst p) x)) ∙ sym (+-comm (fst f) (suc x))) ∙ snd f ⟩
+          n ∎
+      where
+        f = <-k+-cancel {1} p
 
 L-lem : {n : ℕ} → {l1 l2 : ListWithOrder n} → ((l1 .fst) ≡ (l2 .fst)) → (l1 ≡ l2)
-L-lem {n} {l1} {l2} p = cong₂ (_,_) p {!!}
+L-lem {n} {(l1 , l1')} {(l2 , l2')} p i = p i , f i
+  where
+    f : PathP (λ i → n >L (p i)) l1' l2'
+    f = toPathP (>L-Prop _ _)
 
 ≤--ℕ-+-cancel : {m n : ℕ} → m ≤ n → (n -ℕ m) + m ≡ n
 ≤--ℕ-+-cancel {zero} {n} _ = +-zero _
