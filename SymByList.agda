@@ -25,17 +25,73 @@ fweak : {n : ℕ} (i : Fin n) → Fin (suc n)
 fweak (zero , i<n) = zero , suc-≤-suc zero-≤
 fweak (suc i , i<n) = suc i , suc-≤-suc (≤-trans (≤-suc ≤-refl) i<n)
 
+_↓_ : (n : ℕ) → (k : ℕ) → List ℕ
+n ↓ zero = []
+n ↓ suc k = (k + n) ∷ (n ↓ k)
+
 data _∼'_ {m : ℕ} : List (Fin (suc m)) → List (Fin (suc m)) → Type₀ where
     swap : {n : Fin (suc m)} {k : Fin (suc m)} → (suc (k .fst) < (n .fst)) → (n ∷ k ∷ []) ∼' (k ∷ n ∷ [])
     braid : {n : Fin m} → (fsuc n ∷ fweak n ∷ fsuc n ∷ []) ∼' (fweak n ∷ fsuc n ∷ fweak n ∷ [])
     cancel : {n : Fin (suc m)} → (n ∷ n ∷ []) ∼' []
 
 data _∼_ : {m : ℕ} → List (Fin m) → List (Fin m) → Type₀ where
-    idp : {m : ℕ} {l : List (Fin m)} → l ∼ l
+    id : {m : ℕ} {l : List (Fin m)} → l ∼ l
     rel : {m : ℕ} {l1 l2 : List (Fin (suc m))} → l1 ∼' l2 →  l1 ∼ l2
     Symmetry : {m : ℕ} {l1 l2 : List (Fin m)} → (l1 ∼ l2) → l2 ∼ l1
     trans : {m : ℕ} {l1 l2 l3 : List (Fin m)} → (l1 ∼ l2) → (l2 ∼ l3) → l1 ∼ l3
     ++-hom : {m : ℕ} {l l' r r' : List (Fin m)} → (l ∼ l') → (r ∼ r') → (l ++ r) ∼ (l' ++ r')
+
+data _~_ : List ℕ → List ℕ → Type₀ where
+  cancel~ : {n : ℕ} → (l r m mf : List ℕ) → (defm : m ≡ l ++ n ∷ n ∷ r) → (defmf : mf ≡ l ++ r) → (m ~ mf)
+  swap~ : {n : ℕ} → {k : ℕ} → (suc k < n) →  (l r m mf : List ℕ) → (defm : m ≡ l ++ n ∷ k ∷ r) → (defmf : mf ≡ l ++ k ∷ n ∷ r) → (m ~ mf)
+  long~ : {n : ℕ} → (k : ℕ) → (l r m mf : List ℕ) → (defm : m ≡ l ++ (n ↓ (2 + k)) ++ (1 + k + n) ∷ r) → (defmf : mf ≡ l ++ (k + n) ∷ (n ↓ (2 + k)) ++ r) → (m ~ mf)
+
+data _~*_ : List ℕ → List ℕ → Type₀ where
+  id : {m : List ℕ} → m ~* m
+  trans~ : {m1 m2 m3 : List ℕ} → (m1 ~ m2) → (m2 ~* m3) → m1 ~* m3
+
+data _~+_ : List ℕ → List ℕ → Type₀ where
+  trans~ : {m1 m2 m3 : List ℕ} → (m1 ~ m2) → (m2 ~* m3) → m1 ~+ m3
+
+swap-~ : {n : ℕ} → {k : ℕ} → (pk : suc k < n) →  (l r : List ℕ) → (l ++ n ∷ k ∷ r) ~* (l ++ k ∷ n ∷ r)
+swap-~ {k} {n} pk l r = trans~ (swap~ pk l r (l ++ k ∷ _ ∷ r) (l ++ _ ∷ k ∷ r) refl refl) id
+
+long : {n : ℕ} → (k : ℕ) → (l r : List ℕ) → (l ++ (n ↓ (2 + k)) ++ (1 + k + n) ∷ r) ~* (l ++ (k + n) ∷ (n ↓ (2 + k)) ++ r)
+long k l r = trans~ (long~ k l r _ _ refl refl) id
+
+braid-~ : {n : ℕ} → (l r : List ℕ) → (l ++ (suc n) ∷ n ∷ (suc n) ∷ r) ~* (l ++ n ∷ suc n ∷ n ∷ r)
+braid-~ {n} l r = long {n} 0 l r
+
+trans-~ : {m1 m2 m3 : List ℕ} → (m1 ~* m2) → (m2 ~* m3) → m1 ~* m3
+trans-~ id p  = p
+trans-~ (trans~ x q) p = trans~ x (trans-~ q p)
+
+add-l-lem : (m1 m2 l : List ℕ) → m1 ~ m2 → (l ++ m1) ~ (l ++ m2)
+add-l-lem m1 m2 l (cancel~ l₁ r .m1 .m2 defm defmf) = cancel~ (l ++ l₁) r _ _ (cong (λ k → (l ++ k)) defm ∙ sym(++-assoc l l₁ _)) (cong (λ k → (l ++ k)) defmf ∙ sym(++-assoc l l₁ _))
+add-l-lem m1 m2 l (swap~ x l₁ r .m1 .m2 defm defmf) = swap~ x (l ++ l₁) r _ _ (cong (λ k → (l ++ k)) defm ∙ sym(++-assoc l l₁ _)) (cong (λ k → (l ++ k)) defmf ∙ sym(++-assoc l l₁ _))
+add-l-lem m1 m2 l (long~ k l₁ r .m1 .m2 defm defmf) = long~ k (l ++ l₁) r _ _ (cong (λ k → (l ++ k)) defm ∙ sym(++-assoc l l₁ _)) (cong (λ k → (l ++ k)) defmf ∙ sym(++-assoc l l₁ _))
+
+add-l : (m1 m2 l : List ℕ) → m1 ~* m2 → (l ++ m1) ~* (l ++ m2)
+add-l m1 .m1 l id = _~*_.id
+add-l m1 m2 l (trans~ {m2 = m3} x p) = trans~ (add-l-lem m1 m3 l x) (add-l m3 m2 l p)
+
+add-r-lem : (m1 m2 l : List ℕ) → m1 ~ m2 → (m1 ++ l) ~ (m2 ++ l)
+add-r-lem m1 m2 r (cancel~ l r₁ .m1 .m2 defm defmf) = cancel~ l (r₁ ++ r) _ _ (cong (λ k → (k ++ r)) defm ∙ ++-assoc l _ r) (cong (λ k → (k ++ r)) defmf ∙ ++-assoc l _ r)
+add-r-lem m1 m2 r (swap~ x l r₁ .m1 .m2 defm defmf) = swap~ x l (r₁ ++ r) _ _  (cong (λ k → (k ++ r)) defm ∙ ++-assoc l _ r) (cong (λ k → (k ++ r)) defmf ∙ ++-assoc l _ r)
+add-r-lem m1 m2 r (long~ k l r₁ .m1 .m2 defm defmf) = long~ k l (r₁ ++ r) _ _  (cong (λ k → (k ++ r)) defm ∙ ++-assoc l _ r ∙ cong₂ _++_ (refl {x = l}) (cong₂ _∷_ refl (cong₂ _∷_ refl (++-assoc (_ ↓ k) _ r)))) 
+                                                                                (cong (λ k → (k ++ r)) defmf ∙ ++-assoc l _ r ∙ cong₂ _++_ (refl {x = l}) (cong₂  _∷_ refl (cong₂ _∷_ refl (cong₂ _∷_  refl (++-assoc _ r₁ r)))))
+
+add-r : (m1 m2 l : List ℕ) → m1 ~* m2 → (m1 ++ l) ~* (m2 ++ l)
+add-r m1 .m1 r id = _~*_.id
+add-r m1 m2 r (trans~ {m2 = m3} x p) = trans~ (add-r-lem m1 m3 r x) (add-r m3 m2 r p)
+
+¬nil~cons : {x : ℕ} → ¬ ((x ∷ []) ~ [])
+¬nil~cons (cancel~ [] r .(_ ∷ []) .[] defm defmf) = ¬nil≡cons (cons-inj₂ defm)
+¬nil~cons (cancel~ (x ∷ l) r .(_ ∷ []) .[] defm defmf) = ¬nil≡cons defmf
+¬nil~cons (swap~ x [] r .(_ ∷ []) .[] defm defmf) = ¬nil≡cons defmf
+¬nil~cons (swap~ x (x₁ ∷ l) r .(_ ∷ []) .[] defm defmf) = ¬nil≡cons defmf
+¬nil~cons (long~ k [] r .(_ ∷ []) .[] defm defmf) = ¬nil≡cons defmf
+¬nil~cons (long~ k (x ∷ l) r .(_ ∷ []) .[] defm defmf) = ¬nil≡cons defmf
 
 Sym : (n : ℕ) → Type₀
 Sym n = (List (Fin n)) / (_∼_ {n})
@@ -48,10 +104,6 @@ m -ℕ 0 = m
 -ℕ-cancelˡ : ∀ k m n → (k + m) -ℕ (k + n) ≡ m -ℕ n
 -ℕ-cancelˡ zero    = λ _ _ → refl
 -ℕ-cancelˡ (suc k) = -ℕ-cancelˡ k
-
-_↓_ : (n : ℕ) → (k : ℕ) → List ℕ
-n ↓ zero = []
-n ↓ suc k = (k + n) ∷ (n ↓ k)
 
 -- decode LehmerCode to a series of transposition
 
@@ -160,9 +212,7 @@ TransWithOrder : {n : ℕ} → (x : LehmerCode n) → (n >L (LehmerCode→Trans 
 TransWithOrder {zero} x = _>L_.largerThenEmpty
 TransWithOrder {suc n} ((j , j<sn) :: xs) = >L-++ (>L-suc (TransWithOrder xs)) (>L-↓ (suc n) ((suc n) -ℕ j) j (zero , (+-comm j (suc n -ℕ j)) ∙ (≤--ℕ-+-cancel {j} {suc n} (<-weaken j<sn) )))
 
-lem : {n : ℕ} → (ListWithOrder n) ≃ (List (Fin n))
-lem = isoToEquiv (iso f g f-g g-f)
-  where
+private
     f : {n : ℕ} → ListWithOrder n → List (Fin n)
     f {n} ([] , largerThenEmpty) = []
     f {n} (x ∷ xs , (.x :⟨ p ⟩: y)) = (x , p) ∷ f (xs , y)
@@ -179,6 +229,8 @@ lem = isoToEquiv (iso f g f-g g-f)
     g-f ([] , largerThenEmpty) = refl
     g-f (x ∷ xs , (n :⟨ p ⟩: l)) = L-lem (cong₂ (_∷_) refl (cong fst (g-f (xs , l))))
 
+lem : {n : ℕ} → (ListWithOrder n) ≃ (List (Fin n))
+lem = isoToEquiv (iso f g f-g g-f)
 
 Lehmer→Sym : {n : ℕ} → LehmerCode n → List (Fin n)
 Lehmer→Sym {zero} x = []
@@ -188,7 +240,13 @@ Lehmer→Sym-injective : {n : ℕ} → (x1 x2 : LehmerCode (suc n)) → (Lehmer�
 Lehmer→Sym-injective x1 x2 p = {!!}
 
 Sym→Lehmer-Helper : {n : ℕ} → (x : List (Fin (suc n))) → Σ (LehmerCode (suc n)) (λ y → x ∼ Lehmer→Sym y)
-Sym→Lehmer-Helper = {!!}
+Sym→Lehmer-Helper {n} x = {!!}
+  where
+    tmp = g (rev x)
+    mx = fst tmp
+    ns = snd tmp
+    LehmerTmp = List
+
 
 Sym→Lehmer : {n : ℕ} →  List (Fin n) → LehmerCode n
 Sym→Lehmer {zero} [] = []
@@ -196,7 +254,7 @@ Sym→Lehmer {zero} ((x , p) ∷ xs) = ⊥.rec (¬-<-zero p)
 Sym→Lehmer {suc n} x = Sym→Lehmer-Helper x . fst
 
 Sym→Sym : {n : ℕ} → (x : List (Fin n)) → Lehmer→Sym (Sym→Lehmer x) ∼ x
-Sym→Sym {zero} [] = idp
+Sym→Sym {zero} [] = id
 Sym→Sym {zero} ((x , p) ∷ xs) = ⊥.rec (¬-<-zero p)
 Sym→Sym {suc n} x = Symmetry {suc n} (Sym→Lehmer-Helper x . snd)
 
