@@ -1,11 +1,13 @@
+\usepackage[utf8]{inputenc}
+\begin{document}
+
+
+\begin{code}[hide]
 {-# OPTIONS --cubical #-}
-module Base where
 
 open import Cubical.Core.Everything
 
 open import Cubical.Foundations.Prelude
-open import Cubical.Foundations.Equiv
-open import Cubical.Foundations.Function
 open import Cubical.Foundations.Transport
 open import Cubical.Foundations.HLevels
 open import Cubical.Foundations.Isomorphism
@@ -18,7 +20,8 @@ open import Cubical.Foundations.Isomorphism
 open import Cubical.Data.Sigma
 open import Cubical.Data.Nat as ℕ renaming (_+_ to _+ℕ_ ; _·_ to _*ℕ_)
 
-
+\end{code}
+\begin{code}
 rel : (ℕ × ℕ) → (ℕ × ℕ) → Type₀
 rel (a₀ , b₀) (a₁ , b₁) = x ≡ y
   where
@@ -214,3 +217,5 @@ IsSemigroup.is-set (IsMonoid.isSemigroup (IsGroup.isMonoid ℤ-isGroup)) = ℤ-i
 IsSemigroup.assoc (IsMonoid.isSemigroup (IsGroup.isMonoid ℤ-isGroup)) = ℤ+-assoc
 IsMonoid.identity (IsGroup.isMonoid ℤ-isGroup) = λ x → (zero-[a,a]ʳ 0 x  , zero-[a,a]ˡ 0 x)
 IsGroup.inverse ℤ-isGroup = λ x → (-ℤ'-invʳ x , -ℤ'-invˡ x)
+\end{code}
+\end{document}
